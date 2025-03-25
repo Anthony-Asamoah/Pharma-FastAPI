@@ -13,14 +13,12 @@ class BaseSchema(BaseModel):
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     deleted_at: Optional[datetime] = None
-    is_deleted: Optional[bool] = None
 
     class Config:
         from_attributes = True
         validate_assignment: bool = True
         populate_by_name: bool = True
         json_encoders: dict = {datetime: fmt.datetime_to_isoformat}
-        alias_generator: Any = fmt.dict_key_to_camel_case
 
 
 class BaseSchemaModel(BaseModel):
@@ -28,7 +26,6 @@ class BaseSchemaModel(BaseModel):
         validate_assignment=True,
         populate_by_name=True,
         json_encoders={datetime: fmt.datetime_to_isoformat},
-        alias_generator=fmt.snake_to_camel,
     )
 
 

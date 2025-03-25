@@ -1,16 +1,15 @@
 import typing
 import typing as t
-from datetime import datetime
 from functools import reduce
 from uuid import uuid4
 
 import inflect
 import pendulum
 import sqlalchemy
-from pydantic import UUID4
-from sqlalchemy import DateTime, UUID
+from sqlalchemy import DateTime, Column
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import as_declarative
-from sqlalchemy.orm import DeclarativeBase, declared_attr, Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase, declared_attr
 
 
 class DBTable(DeclarativeBase):
@@ -40,19 +39,19 @@ class Base:
 
 class BaseModel(Base):
     __abstract__ = True
-    id: Mapped[UUID4] = mapped_column(UUID(as_uuid=True), default=lambda: uuid4().hex, primary_key=True)
-    created_at: Mapped[datetime] = mapped_column(
+    id = Column(UUID, default=lambda: uuid4().hex, primary_key=True)
+    created_at = Column(
         DateTime(timezone=True),
         default=pendulum.now,
         nullable=False
     )
-    updated_at: Mapped[datetime] = mapped_column(
+    updated_at = Column(
         DateTime(timezone=True),
         default=pendulum.now,
         onupdate=pendulum.now,
         nullable=False
     )
-    deleted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
+    deleted_at = Column(DateTime(timezone=True), nullable=True)
 
     @property
     def is_deleted(self) -> bool:

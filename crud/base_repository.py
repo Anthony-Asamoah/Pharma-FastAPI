@@ -63,6 +63,7 @@ class BaseCRUDRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType])
         if id is None: return None
         try:
             result = db.query(self.model).filter(self.model.id == id).first()
+            if not result and not silent: raise NoResultFound
             return result
         except NoResultFound:
             if silent: return None
@@ -405,7 +406,7 @@ class BaseCRUDRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType])
             raise await http_500_exc_internal_server_error()
 
     async def delete(
-            self, *, db: Session, id: Optional[UUID4] = None, db_obj: Optional[ModelType] = None, soft: bool=False
+            self, *, db: Session, id: Optional[UUID4] = None, db_obj: Optional[ModelType] = None, soft: bool = False
     ) -> None:
         """
         Delete a record by ID or pass in the object to be deleted.

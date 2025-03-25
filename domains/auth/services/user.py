@@ -47,21 +47,21 @@ class UserService:
         )
         return users
 
-    async def create_user(self, db: Session, *, user_in: UserCreate) -> UserSchema:
-        user = await self.repo.create(db=db, data=user_in)
+    async def create_user(self, db: Session, *, data: UserCreate) -> UserSchema:
+        user = await self.repo.create(db=db, data=data)
         return user
 
-    async def update_user(self, db: Session, *, id: UUID4, user_in: UserUpdate) -> UserSchema:
+    async def update_user(self, db: Session, *, id: UUID4, data: UserUpdate) -> UserSchema:
         user = await self.repo.get_by_id(db=db, id=id)
-        user = await self.repo.update(db=db, db_obj=user, data=user_in)
+        user = await self.repo.update(db=db, db_obj=user, data=data)
         return user
 
     async def get_user(self, db: Session, *, id: UUID4) -> UserSchema:
         user = await self.repo.get_by_id(db=db, id=id)
         return user
 
-    async def delete_user(self, db: Session, *, id: UUID4) -> None:
-        await self.repo.delete(db=db, id=id, soft=False)
+    async def delete_user(self, db: Session, *, id: UUID4, soft=False) -> None:
+        await self.repo.delete(db=db, id=id, soft=soft)
 
     async def get_user_by_keywords(
             self, db: Session, *,

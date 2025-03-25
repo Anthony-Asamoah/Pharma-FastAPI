@@ -47,7 +47,3 @@ class UserRole(BaseModel):
 
 class UserPermission(BaseModel):
     permission_ids: List[UUID4]
-
-
-class UserIds(BaseModel):
-    ids: List[UUID4]

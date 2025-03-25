@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 
 from domains.auth.repositories.permission import permission_actions as permission_repo
 from domains.auth.schemas.permission import PermissionSchema, PermissionUpdate, PermissionCreate
-from domains.auth.services.user import user_service
 
 
 class PermissionService:
@@ -16,8 +15,7 @@ class PermissionService:
     async def get_all_permissions_by_user_id(
             self, *, db: Session, user_id: UUID4, skip: int = 0, limit: int = 100
     ) -> List[PermissionSchema]:
-        # todo: refactor method appropriately
-        permissions = await user_service.get_all_permissions(db=db, id=user_id)
+        permissions = await self.repo.get_all_by_user_id(db=db, user_id=user_id, skip=skip, limit=limit)
         return permissions
 
     async def list_permissions(

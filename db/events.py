@@ -1,52 +1,80 @@
+from typing import Any
+
 import fastapi
 from sqlalchemy import event
-from sqlalchemy.dialects.postgresql.asyncpg import AsyncAdapt_asyncpg_connection
-from sqlalchemy.ext.asyncio import AsyncConnection
-from sqlalchemy.pool.base import _ConnectionRecord
+from sqlalchemy.engine import Connection
 
 from config.logger import log
+from db.session import engine, SessionLocal
 from db.table import Base
 
 
-@event.listens_for(target=async_db.async_engine.sync_engine, identifier="connect")
+@event.listens_for(target=engine, identifier="connect")
 def inspect_db_server_on_connection(
-        db_api_connection: AsyncAdapt_asyncpg_connection, connection_record: _ConnectionRecord
+        db_connection: Connection, connection_record: Any
 ) -> None:
-    log.info(f"New DB API Connection ---\n {db_api_connection}")
+    """
+    Log details when a database connection is established.
+
+    :param db_connection: The database connection object
+    :param connection_record: Connection record details
+    """
+    log.info(f"New DB Connection ---\n {db_connection}")
     log.info(f"Connection Record ---\n {connection_record}")
 
 
-@event.listens_for(target=async_db.async_engine.sync_engine, identifier="close")
+@event.listens_for(target=engine, identifier="close")
 def inspect_db_server_on_close(
-        db_api_connection: AsyncAdapt_asyncpg_connection, connection_record: _ConnectionRecord
+        db_connection: Connection, connection_record: Any
 ) -> None:
-    log.info(f"Closing DB API Connection ---\n {db_api_connection}")
+    """
+    Log details when a database connection is closed.
+
+    :param db_connection: The database connection object
+    :param connection_record: Connection record details
+    """
+    log.info(f"Closing DB Connection ---\n {db_connection}")
     log.info(f"Closed Connection Record ---\n {connection_record}")
 
 
-async def initialize_db_tables(connection: AsyncConnection) -> None:
+def initialize_db_tables() -> None:
+    """
+    Initialize database tables by dropping and recreating all tables.
+    """
     log.info("Database Table Creation --- Initializing . . .")
 
-    await connection.run_sync(Base.metadata.drop_all)
-    await connection.run_sync(Base.metadata.create_all)
+    Base.metadata.drop_all(engine)
+    Base.metadata.create_all(engine)
 
     log.info("Database Table Creation --- Successfully Initialized!")
 
 
-async def initialize_db_connection(backend_app: fastapi.FastAPI) -> None:
+def initialize_db_connection(backend_app: fastapi.FastAPI) -> None:
+    """
+    Establish database connection and initialize tables.
+
+    :param backend_app: FastAPI application instance
+    """
     log.info("Database Connection --- Establishing . . .")
 
-    backend_app.state.db = async_db
+    # Store the engine and session maker in app state
+    backend_app.state.db_engine = engine
+    backend_app.state.db_session = SessionLocal
 
-    async with backend_app.state.db.async_engine.begin() as connection:
-        await initialize_db_tables(connection=connection)
+    # Initialize tables
+    initialize_db_tables()
 
     log.info("Database Connection --- Successfully Established!")
 
 
-async def dispose_db_connection(backend_app: fastapi.FastAPI) -> None:
+def dispose_db_connection(backend_app: fastapi.FastAPI) -> None:
+    """
+    Dispose of the database connection.
+
+    :param backend_app: FastAPI application instance
+    """
     log.info("Database Connection --- Disposing . . .")
 
-    await backend_app.state.db.async_engine.dispose()
+    backend_app.state.db_engine.dispose()
 
     log.info("Database Connection --- Successfully Disposed!")

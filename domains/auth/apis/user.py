@@ -2,7 +2,6 @@ from typing import Any, List, Literal
 
 from fastapi import APIRouter, Depends, status
 from pydantic import UUID4
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
 from crud.base_schema import HTTPError
@@ -22,7 +21,7 @@ user_router = APIRouter(prefix="/users")
     response_model=List[schemas.UserSchema],
 )
 async def list_users(
-        *, db: AsyncSession = Depends(get_db),
+        *, db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user),
         skip: int = 0,
         limit: int = 100,
@@ -41,11 +40,11 @@ async def list_users(
     status_code=status.HTTP_201_CREATED,
 )
 async def create_user(
-        *, db: AsyncSession = Depends(get_db),
+        *, db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user),
-        user_in: schemas.UserCreate
+        data: schemas.UserCreate
 ) -> Any:
-    user = await actions.create_user(db=db, user_in=user_in)
+    user = await actions.create_user(db=db, data=data)
     return user
 
 
@@ -55,12 +54,12 @@ async def create_user(
     responses={status.HTTP_404_NOT_FOUND: {"model": HTTPError}},
 )
 async def update_user(
-        *, db: AsyncSession = Depends(get_db),
+        *, db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user),
         id: UUID4,
-        user_in: schemas.UserUpdate,
+        data: schemas.UserUpdate,
 ) -> Any:
-    user = await actions.update_user(db=db, id=id, user_in=user_in)
+    user = await actions.update_user(db=db, id=id, data=data)
     return user
 
 
@@ -70,7 +69,7 @@ async def update_user(
     responses={status.HTTP_404_NOT_FOUND: {"model": HTTPError}},
 )
 async def get_user(
-        *, db: AsyncSession = Depends(get_db),
+        *, db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user),
         id: UUID4
 ) -> Any:
@@ -84,7 +83,7 @@ async def get_user(
     responses={status.HTTP_404_NOT_FOUND: {"model": HTTPError}},
 )
 async def delete_user(
-        *, db: AsyncSession = Depends(get_db),
+        *, db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user),
         id: UUID4
 ) -> None:
