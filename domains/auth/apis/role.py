@@ -66,7 +66,7 @@ async def update_role(
     response_model=schemas.RoleSchema,
     responses={status.HTTP_404_NOT_FOUND: {"model": HTTPError}},
 )
-async def get_role(
+async def get_role_by_id(
         *, db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user),
         id: UUID4
