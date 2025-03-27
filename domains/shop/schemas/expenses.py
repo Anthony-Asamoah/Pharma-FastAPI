@@ -1,6 +1,7 @@
+from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from pydantic import UUID4
 
 from crud.base_schema import BaseSchema
@@ -11,6 +12,7 @@ class ExpensesBase(BaseModel):
     expense: Optional[str] = None
     price: Optional[float] = None
     description: Optional[str] = None
+    paid_at: Optional[datetime] = Field(default=None)
 
 
 # Properties to receive via API on creation

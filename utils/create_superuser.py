@@ -29,7 +29,7 @@ async def create_system_admin():
     if system_admin: return
 
     # create user
-    system_admin = await user_service.create_user(db=db, user_in=UserCreate(
+    system_admin = await user_service.create_user(db=db, data=UserCreate(
         first_name=SuperAdminInfo.first_name,
         last_name=SuperAdminInfo.last_name,
         username=SuperAdminInfo.username,

@@ -18,7 +18,7 @@ expenses_router = APIRouter(prefix="/expenses")
     "",
     response_model=List[schemas.ExpensesSchema],
 )
-async def list_expense(
+async def list_expenses(
         *, db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user),
         skip: int = 0,
@@ -26,7 +26,7 @@ async def list_expense(
         order_by: str = None,
         order_direction: Literal['asc', 'desc'] = 'asc'
 ) -> Any:
-    expense = await actions.list_expense(
+    expense = await actions.list_expenses(
         db=db, skip=skip, limit=limit, order_by=order_by, order_direction=order_direction
     )
     return expense

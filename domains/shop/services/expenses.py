@@ -1,5 +1,6 @@
 from typing import List, Optional, Literal
 
+import pendulum
 from pydantic import UUID4
 from sqlalchemy.orm import Session
 
@@ -25,6 +26,7 @@ class ExpensesService:
         return expense
 
     async def create_expenses(self, db: Session, *, data: ExpensesCreate, created_by_id: UUID4) -> ExpensesSchema:
+        if not data.paid_at: data.paid_at = pendulum.now()
         expenses = await self.repo.create(db=db, data=data, created_by_id=created_by_id)
         return expenses
 
