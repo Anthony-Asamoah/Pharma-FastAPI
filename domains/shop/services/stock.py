@@ -4,7 +4,7 @@ from pydantic import UUID4
 from sqlalchemy.orm import Session
 
 from domains.shop.repositories.stock import stock_actions as stock_repo
-from domains.shop.schemas.stock import StockSchema, StockUpdate, StockCreate
+from domains.shop.schemas.stock import StockSchema, StockUpdate, StockCreate, StockUpdateInternal
 
 
 class StockService:
@@ -24,12 +24,24 @@ class StockService:
         )
         return stocks
 
-    async def create_stock(self, db: Session, *, data: StockCreate) -> StockSchema:
-        stock = await self.repo.create(db=db, data=data)
+    async def create_stock(self, db: Session, *, data: StockCreate, created_by_id: UUID4) -> StockSchema:
+        # perform validations
+        if data.purchase_price >= data.selling_price: raise ValueError(
+            "Selling price should be greater than purchase price"
+        )
+        stock = await self.repo.create(db=db, data=data, created_by_id=created_by_id)
         return stock
 
     async def update_stock(self, db: Session, *, id: UUID4, data: StockUpdate) -> StockSchema:
         stock = await self.repo.get_by_id(db=db, id=id)
+        stock = await self.repo.update(db=db, db_obj=stock, data=data)
+
+        # set values
+        from domains.shop.services.sale import sale_service
+        payload = StockUpdateInternal(**data.model_dump())
+        payload.issues = await sale_service.get_sales_count_for_stock(db=db, stock_id=stock.id)
+        payload.total_issues_cost = await sale_service.get_total_sales_amount_for_stock(db=db, stock_id=stock.id)
+
         stock = await self.repo.update(db=db, db_obj=stock, data=data)
         return stock
 
@@ -37,8 +49,8 @@ class StockService:
         stock = await self.repo.get_by_id(db=db, id=id)
         return stock
 
-    async def delete_stock(self, db: Session, *, id: UUID4) -> None:
-        await self.repo.delete(db=db, id=id, soft=False)
+    async def delete_stock(self, db: Session, *, id: UUID4, soft=True) -> None:
+        await self.repo.delete(db=db, id=id, soft=soft)
 
     async def get_stock_by_keywords(
             self, db: Session, *,

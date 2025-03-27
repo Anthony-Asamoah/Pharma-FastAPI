@@ -1,10 +1,10 @@
-from datetime import date, datetime, time
-from typing import Optional, Any, Dict
+from typing import Optional, List
 
 from pydantic import BaseModel
 from pydantic import UUID4
 
 from crud.base_schema import BaseSchema
+from domains.shop.schemas.sale import SaleSchema
 
 
 # Receipt
@@ -28,4 +28,14 @@ class ReceiptUpdate(ReceiptBase):
 
 # Additional properties to return via API
 class ReceiptSchema(ReceiptBase, BaseSchema):
-    pass
+    items: Optional[List[SaleSchema]]
+
+
+# Full Schema to create a receipt
+class RelatedSaleCreate(BaseModel):
+    quantity: int
+    item_id: UUID4
+
+
+class ReceiptCreateWithSales(ReceiptCreate):
+    items: List[RelatedSaleCreate]

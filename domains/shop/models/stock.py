@@ -1,6 +1,6 @@
 import pendulum
 from sqlalchemy import (
-    Column, Integer, Date, String, DateTime, Float, Text, UUID, ForeignKey
+    Column, Integer, Date, String, Float, Text, UUID, ForeignKey
 )
 from sqlalchemy.orm import relationship
 
@@ -21,13 +21,24 @@ class Stock(BaseModel):
     sale = relationship("Sale", back_populates="item")
 
     @property
-    def stock_value(self):
+    def stock_value(self) -> float:
         return round(self.purchase_price * self.quantity)
 
     @property
-    def expected_stock_balance(self):
+    def expected_stock_balance(self) -> float:
         return round(self.quantity * self.selling_price, 2)
 
     @property
-    def expected_profit(self):
+    def expected_profit(self) -> float:
         return round(self.expected_stock_balance - self.stock_value, 2)
+
+    @property
+    def is_expired(self) -> bool:
+        return self.expiry_date <= pendulum.now().date()
+
+    @property
+    def days_to_expiry(self) -> int:
+        if self.is_expired: return 0
+        today = pendulum.today().date()
+        if today > self.expiry_date: return 0
+        return (self.expiry_date - today).days

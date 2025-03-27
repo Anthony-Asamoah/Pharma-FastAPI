@@ -1,10 +1,14 @@
+import asyncio
 from typing import List, Optional, Literal
 
 from pydantic import UUID4
 from sqlalchemy.orm import Session
 
 from domains.shop.repositories.receipt import receipt_actions as receipt_repo
-from domains.shop.schemas.receipt import ReceiptSchema, ReceiptUpdate, ReceiptCreate
+from domains.shop.schemas.receipt import ReceiptSchema, ReceiptUpdate, ReceiptCreateWithSales
+from domains.shop.schemas.sale import SaleCreate
+from domains.shop.services.sale import sale_service
+from domains.shop.services.stock import stock_service
 
 
 class ReceiptService:
@@ -24,8 +28,23 @@ class ReceiptService:
         )
         return receipts
 
-    async def create_receipt(self, db: Session, *, data: ReceiptCreate) -> ReceiptSchema:
+    async def create_receipt(self, db: Session, *, data: ReceiptCreateWithSales, created_by: UUID4) -> ReceiptSchema:
         receipt = await self.repo.create(db=db, data=data)
+
+        # create associated sales
+        items = await stock_service.repo.get_many_by_ids(db=db, ids=[item.item_id for item in data.items])
+        items_map = {item.id: item for item in items}
+
+        await asyncio.gather(*[
+            sale_service.create_sale(db=db, data=SaleCreate(
+                cost=round(item.quantity * items_map[item.item_id].selling_price, 2),
+                quantity=item.quantity,
+                item_id=item.item_id,
+                receipt_id=receipt.id,
+                created_by_id=created_by,
+            )) for item in data.items
+        ])
+        receipt = await self.get_receipt(db=db, id=receipt.id)
         return receipt
 
     async def update_receipt(self, db: Session, *, id: UUID4, data: ReceiptUpdate) -> ReceiptSchema:

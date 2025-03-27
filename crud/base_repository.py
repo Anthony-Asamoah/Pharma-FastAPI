@@ -337,7 +337,7 @@ class BaseCRUDRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType])
             log.exception(f"Error in get_or_create for {self.model.__name__}")
             raise await http_500_exc_internal_server_error()
 
-    async def create(self, *, db: Session, data: CreateSchemaType) -> ModelType:
+    async def create(self, *, db: Session, data: CreateSchemaType, created_by_id: Optional[UUID4] = None) -> ModelType:
         """
         Create a new record.
 
@@ -358,6 +358,8 @@ class BaseCRUDRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType])
         try:
             model_data = data.model_dump(exclude_none=True, exclude_defaults=False)
             db_obj = self.model(**model_data)
+            if created_by_id and hasattr(db_obj, 'created_by_id'):
+                db_obj.created_by_id = created_by_id
 
             db.add(db_obj)
             db.commit()

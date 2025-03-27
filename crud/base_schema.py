@@ -13,6 +13,7 @@ class BaseSchema(BaseModel):
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     deleted_at: Optional[datetime] = None
+    is_deleted: Optional[bool] = None
 
     class Config:
         from_attributes = True

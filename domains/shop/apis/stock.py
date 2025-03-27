@@ -42,7 +42,7 @@ async def create_stock(
         current_user: User = Depends(get_current_user),
         data: schemas.StockCreate
 ) -> Any:
-    stock = await actions.create_stock(db=db, data=data)
+    stock = await actions.create_stock(db=db, data=data, created_by_id=current_user.id)
     return stock
 
 
@@ -83,6 +83,7 @@ async def get_stock(
 async def delete_stock(
         *, db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user),
-        id: UUID4
+        id: UUID4,
+        soft=True
 ) -> None:
-    await actions.delete_stock(db=db, id=id)
+    await actions.delete_stock(db=db, id=id, soft=soft)

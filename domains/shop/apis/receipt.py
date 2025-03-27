@@ -40,9 +40,9 @@ async def list_receipts(
 async def create_receipt(
         *, db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user),
-        data: schemas.ReceiptCreate
+        data: schemas.ReceiptCreateWithSales
 ) -> Any:
-    receipt = await actions.create_receipt(db=db, data=data)
+    receipt = await actions.create_receipt(db=db, data=data, created_by=current_user.id)
     return receipt
 
 
