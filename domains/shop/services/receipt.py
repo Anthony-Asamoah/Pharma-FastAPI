@@ -1,9 +1,11 @@
 import asyncio
+from datetime import datetime
 from typing import List, Optional, Literal
 
 from pydantic import UUID4
 from sqlalchemy.orm import Session
 
+from config.settings import settings
 from domains.shop.repositories.receipt import receipt_actions as receipt_repo
 from domains.shop.schemas.receipt import ReceiptSchema, ReceiptUpdate, ReceiptCreateWithSales, ReceiptCreateInternal, \
     VanillaReceiptSchema
@@ -22,10 +24,20 @@ class ReceiptService:
             skip: int = 0,
             limit: int = 100,
             order_by: str = None,
-            order_direction: Literal['asc', 'desc'] = 'asc'
+            order_direction: Literal['asc', 'desc'] = 'asc',
+            is_refunded: bool = None,
+            payment_type: str = None,
+            price_from: float = None,
+            price_to: float = None,
+            time_from: datetime = None,
+            time_to: datetime = None,
     ) -> List[VanillaReceiptSchema]:
         receipts = await self.repo.get_all(
-            db=db, skip=skip, limit=limit, order_by=order_by, order_direction=order_direction
+            db=db, skip=skip, limit=limit,
+            order_by=order_by, order_direction=order_direction,
+            time_from=time_from, time_to=time_to,
+            price_from=price_from, price_to=price_to,
+            is_refunded=is_refunded, payment_type=payment_type
         )
         return receipts
 
@@ -62,7 +74,7 @@ class ReceiptService:
             db=db,
             created_by_id=created_by_id,
             data=ReceiptCreateInternal(
-                amount_paid=data.amount_paid,
+                **data.model_dump(exclude_none=True),
                 total_cost=total_cost,
             ))
 
@@ -72,6 +84,7 @@ class ReceiptService:
                 quantity=item.quantity,
                 item_id=item.item_id,
                 receipt_id=receipt.id,
+                payment_type=receipt.payment_type,
                 created_by_id=created_by_id,
             )) for item in data.items
         ])
@@ -88,7 +101,8 @@ class ReceiptService:
 
     async def delete_receipt(self, db: Session, *, id: UUID4) -> None:
         receipt = await self.repo.get_by_id(db=db, id=id)
-        for sale in receipt.sales:
+        sales = await sale_service.get_sale_by_keywords(db=db, receipt_id=receipt.id)
+        for sale in sales:
             await sale_service.delete_sale(db=db, id=sale.id)
         await self.repo.delete(db=db, db_obj=receipt, soft=True)
 

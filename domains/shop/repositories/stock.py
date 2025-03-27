@@ -37,6 +37,7 @@ class CRUDStock(BaseCRUDRepository[Stock, StockCreateInternal, StockUpdateIntern
             limit: int = 100,
             order_by: str = None,
             order_direction: Literal['asc', 'desc'] = 'asc',
+            search: str = None,
             quantity_min: int = None,
             quantity_max: int = None,
             expiry_date_min: date = None,
@@ -46,6 +47,8 @@ class CRUDStock(BaseCRUDRepository[Stock, StockCreateInternal, StockUpdateIntern
     ):
         query = db.query(self.model)
         try:
+            if search: query = query.filter(Stock.name.ilike(f"%{search.strip()}%"))
+
             if selling_price_min is not None: query = query.filter(Stock.selling_price >= selling_price_min)
             if selling_price_max is not None: query = query.filter(Stock.selling_price <= selling_price_max)
 

@@ -5,12 +5,12 @@ from pydantic import UUID4
 
 from crud.base_schema import BaseSchema
 from domains.common.schema.related import RelatedUserSchema, RelatedSaleSchema
-from domains.shop.schemas.sale import SaleSchema
 
 
 # Receipt
 class ReceiptBase(BaseModel):
     amount_paid: Optional[float] = None
+    payment_type: Optional[str] = "CASH"
 
 
 # Properties to receive via API on creation
@@ -18,7 +18,7 @@ class ReceiptCreate(ReceiptBase):
     amount_paid: float
 
 
-class ReceiptCreateInternal(ReceiptBase):
+class ReceiptCreateInternal(ReceiptCreate):
     total_cost: float
 
 
@@ -28,19 +28,19 @@ class ReceiptUpdate(ReceiptBase):
 
 
 class ReceiptUpdateInternal(ReceiptBase):
-    total_cost: float
+    total_cost: Optional[float] = None
 
 
 # Additional properties to return via API
 class VanillaReceiptSchema(ReceiptBase, BaseSchema):
     total_cost: Optional[float] = None
-    created_by_id: UUID4
+    balance: Optional[float] = None
+    created_by_id: Optional[UUID4] = None
 
 
 class ReceiptSchema(VanillaReceiptSchema):
-    balance: Optional[float] = None
-    created_by: RelatedUserSchema
-    items: Optional[List[RelatedSaleSchema]]
+    created_by: Optional[RelatedUserSchema] = None
+    items: Optional[List[RelatedSaleSchema]] = None
 
 
 # Full Schema to create a receipt

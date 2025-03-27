@@ -18,6 +18,5 @@ class RelatedStockSchema(BaseModel):
 
 class RelatedSaleSchema(BaseModel):
     quantity: Optional[int] = None
-    payment_type: Optional[str] = "CASH"
     cost: Optional[float] = None
     item: RelatedStockSchema

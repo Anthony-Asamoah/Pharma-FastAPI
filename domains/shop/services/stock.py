@@ -27,6 +27,7 @@ class StockService:
             limit: int = 100,
             order_by: str = None,
             order_direction: Literal['asc', 'desc'] = 'asc',
+            search: str = None,
             quantity_min: int = None,
             quantity_max: int = None,
             expiry_date_min: date = None,
@@ -35,7 +36,7 @@ class StockService:
             selling_price_max: float = None,
     ) -> List[VanillaStockSchema]:
         stocks = await self.repo.get_all(
-            db=db, skip=skip, limit=limit,
+            db=db, skip=skip, limit=limit, search=search,
             order_by=order_by, order_direction=order_direction,
             quantity_min=quantity_min, quantity_max=quantity_max,
             expiry_date_min=expiry_date_min, expiry_date_max=expiry_date_max,

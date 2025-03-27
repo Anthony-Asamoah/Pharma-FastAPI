@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any, List, Literal
 
 from fastapi import APIRouter, Depends, status
@@ -24,10 +25,20 @@ async def list_receipts(
         skip: int = 0,
         limit: int = 100,
         order_by: str = None,
-        order_direction: Literal['asc', 'desc'] = 'asc'
+        order_direction: Literal['asc', 'desc'] = 'asc',
+        is_refunded: bool = None,
+        payment_type: str = None,
+        price_from: float = None,
+        price_to: float = None,
+        time_from: datetime = None,
+        time_to: datetime = None,
 ) -> Any:
     receipts = await actions.list_receipts(
-        db=db, skip=skip, limit=limit, order_by=order_by, order_direction=order_direction
+        db=db, skip=skip, limit=limit,
+        order_by=order_by, order_direction=order_direction,
+        time_from=time_from, time_to=time_to,
+        price_from=price_from, price_to=price_to,
+        is_refunded=is_refunded, payment_type=payment_type
     )
     return receipts
 
