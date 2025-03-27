@@ -10,6 +10,7 @@ from domains.common.schema.related import RelatedUserSchema
 
 # Stock
 class StockBase(BaseModel):
+    ref: Optional[str] = None
     name: Optional[str] = None
     description: Optional[str] = None
     purchase_price: Optional[float] = None
@@ -20,6 +21,7 @@ class StockBase(BaseModel):
 
 # Properties to receive via API on creation
 class StockCreate(StockBase):
+    ref: Optional[str] = None
     name: str
     purchase_price: float
     selling_price: float

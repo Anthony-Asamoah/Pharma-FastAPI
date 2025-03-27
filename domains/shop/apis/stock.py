@@ -89,6 +89,20 @@ async def get_stock(
     return stock
 
 
+@stock_router.get(
+    "/ref/{id}",
+    response_model=schemas.StockSchema,
+    responses={status.HTTP_404_NOT_FOUND: {"model": HTTPError}},
+)
+async def get_stock_by_reference(
+        *, db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user),
+        id: str
+) -> Any:
+    stock = await actions.get_by_reference(db=db, ref=id)
+    return stock
+
+
 @stock_router.delete(
     "/{id}",
     status_code=status.HTTP_204_NO_CONTENT,

@@ -1,5 +1,6 @@
 from datetime import date
 from typing import List, Optional, Literal
+from uuid import uuid4
 
 from pydantic import UUID4
 from sqlalchemy.orm import Session
@@ -13,13 +14,16 @@ class StockService:
     def __init__(self):
         self.repo = stock_repo
 
-    async def sell_an_item(self, db: Session, id: UUID4, quantity: int) -> None:
+    async def sell_an_item(self, db: Session, *, id: UUID4, quantity: int) -> None:
         await self.repo.sell_an_item(db=db, id=id, quantity=quantity)
         await self.update_stock(db=db, id=id, data=StockUpdate())
 
-    async def return_an_item(self, db: Session, id: UUID4, quantity: int) -> None:
+    async def return_an_item(self, db: Session, *, id: UUID4, quantity: int) -> None:
         await self.repo.return_an_item(db=db, id=id, quantity=quantity)
         await self.update_stock(db=db, id=id, data=StockUpdate())
+
+    async def get_by_reference(self, db: Session, *, ref: str, silent=False) -> Optional[StockSchema]:
+        return await self.repo.get_by_field(db=db, field="ref", value=ref, silent=silent)
 
     async def list_stocks(
             self, db: Session, *,
@@ -49,6 +53,8 @@ class StockService:
         if data.purchase_price >= data.selling_price: raise ValueError(
             "Selling price should be greater than purchase price"
         )
+        if not data.ref: data.ref = str(uuid4())
+        if not isinstance(data.ref, str): data.ref = str(uuid4())
         stock = await self.repo.create(db=db, data=data, created_by_id=created_by_id)
         return stock
 

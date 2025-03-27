@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 import pendulum
 from sqlalchemy import (
     Column, Integer, Date, String, Float, Text, UUID, ForeignKey
@@ -8,6 +10,7 @@ from db.table import BaseModel
 
 
 class Stock(BaseModel):
+    ref = Column(String, nullable=False)
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     purchase_price = Column(Float, nullable=False)
