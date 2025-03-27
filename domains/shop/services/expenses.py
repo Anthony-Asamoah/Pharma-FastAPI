@@ -24,8 +24,8 @@ class ExpensesService:
         )
         return expense
 
-    async def create_expenses(self, db: Session, *, data: ExpensesCreate) -> ExpensesSchema:
-        expenses = await self.repo.create(db=db, data=data)
+    async def create_expenses(self, db: Session, *, data: ExpensesCreate, created_by_id: UUID4) -> ExpensesSchema:
+        expenses = await self.repo.create(db=db, data=data, created_by_id=created_by_id)
         return expenses
 
     async def update_expenses(self, db: Session, *, id: UUID4, data: ExpensesUpdate) -> ExpensesSchema:

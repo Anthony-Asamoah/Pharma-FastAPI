@@ -11,14 +11,12 @@ class ExpensesBase(BaseModel):
     expense: Optional[str] = None
     price: Optional[float] = None
     description: Optional[str] = None
-    created_by_id: Optional[UUID4] = None
 
 
 # Properties to receive via API on creation
 class ExpensesCreate(ExpensesBase):
     expense: str
     price: float
-    created_by_id: UUID4
 
 
 # Properties to receive via API on update
@@ -28,4 +26,4 @@ class ExpensesUpdate(ExpensesBase):
 
 # Additional properties to return via API
 class ExpensesSchema(ExpensesBase, BaseSchema):
-    pass
+    created_by_id: Optional[UUID4] = None

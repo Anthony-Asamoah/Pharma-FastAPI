@@ -42,7 +42,7 @@ async def create_expenses(
         current_user: User = Depends(get_current_user),
         data: schemas.ExpensesCreate
 ) -> Any:
-    expenses = await actions.create_expenses(db=db, data=data)
+    expenses = await actions.create_expenses(db=db, data=data, created_by_id=current_user.id)
     return expenses
 
 
