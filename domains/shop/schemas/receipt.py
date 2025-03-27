@@ -9,16 +9,18 @@ from domains.shop.schemas.sale import SaleSchema
 
 # Receipt
 class ReceiptBase(BaseModel):
-    total_cost: Optional[float] = None
     amount_paid: Optional[float] = None
     created_by_id: Optional[UUID4] = None
 
 
 # Properties to receive via API on creation
 class ReceiptCreate(ReceiptBase):
-    total_cost: float
     amount_paid: float
     created_by_id: UUID4
+
+
+class ReceiptCreateInternal(ReceiptBase):
+    total_cost: float
 
 
 # Properties to receive via API on update
@@ -26,8 +28,13 @@ class ReceiptUpdate(ReceiptBase):
     pass
 
 
+class ReceiptUpdateInternal(ReceiptBase):
+    total_cost: float
+
+
 # Additional properties to return via API
 class ReceiptSchema(ReceiptBase, BaseSchema):
+    total_cost: Optional[float] = None
     items: Optional[List[SaleSchema]]
 
 

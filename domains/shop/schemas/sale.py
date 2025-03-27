@@ -18,10 +18,13 @@ class SaleBase(BaseModel):
 # Properties to receive via API on creation
 class SaleCreate(SaleBase):
     quantity: int
-    cost: Optional[float] = None
     item_id: UUID4
     receipt_id: UUID4
     created_by_id: UUID4
+
+
+class SaleCreateInternal(SaleCreate):
+    cost: float
 
 
 # Properties to receive via API on update
@@ -32,4 +35,3 @@ class SaleUpdate(SaleBase):
 # Additional properties to return via API
 class SaleSchema(SaleBase, BaseSchema):
     cost: Optional[float] = None
-

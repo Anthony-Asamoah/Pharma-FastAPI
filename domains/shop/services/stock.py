@@ -12,8 +12,12 @@ class StockService:
     def __init__(self):
         self.repo = stock_repo
 
-    async def return_stock(self, db: Session, id: UUID4, quantity: int) -> None:
-        await self.repo.return_stock(db=db, id=id, quantity=quantity)
+    async def sell_an_item(self, db: Session, id: UUID4, quantity: int) -> None:
+        await self.repo.sell_an_item(db=db, id=id, quantity=quantity)
+        await self.update_stock(db=db, id=id, data=StockUpdate())
+
+    async def return_an_item(self, db: Session, id: UUID4, quantity: int) -> None:
+        await self.repo.return_an_item(db=db, id=id, quantity=quantity)
         await self.update_stock(db=db, id=id, data=StockUpdate())
 
     async def list_stocks(

@@ -42,3 +42,9 @@ class Stock(BaseModel):
         today = pendulum.today().date()
         if today > self.expiry_date: return 0
         return (self.expiry_date - today).days
+
+    @property
+    def is_available(self) -> bool:
+        if self.is_expired: return False
+        if self.quantity <= 0: return False
+        return True

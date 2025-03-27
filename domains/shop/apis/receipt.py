@@ -46,11 +46,11 @@ async def create_receipt(
     return receipt
 
 
-@receipt_router.put(
-    "/{id}",
-    response_model=schemas.ReceiptSchema,
-    responses={status.HTTP_404_NOT_FOUND: {"model": HTTPError}},
-)
+# @receipt_router.put(
+#     "/{id}",
+#     response_model=schemas.ReceiptSchema,
+#     responses={status.HTTP_404_NOT_FOUND: {"model": HTTPError}},
+# )
 async def update_receipt(
         *, db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user),
@@ -77,6 +77,7 @@ async def get_receipt(
 
 @receipt_router.delete(
     "/{id}",
+    name="refund_all_sold_items",
     status_code=status.HTTP_204_NO_CONTENT,
     responses={status.HTTP_404_NOT_FOUND: {"model": HTTPError}},
 )
