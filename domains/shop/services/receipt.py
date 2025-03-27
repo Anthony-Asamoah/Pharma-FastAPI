@@ -5,7 +5,8 @@ from pydantic import UUID4
 from sqlalchemy.orm import Session
 
 from domains.shop.repositories.receipt import receipt_actions as receipt_repo
-from domains.shop.schemas.receipt import ReceiptSchema, ReceiptUpdate, ReceiptCreateWithSales, ReceiptCreateInternal
+from domains.shop.schemas.receipt import ReceiptSchema, ReceiptUpdate, ReceiptCreateWithSales, ReceiptCreateInternal, \
+    VanillaReceiptSchema
 from domains.shop.schemas.sale import SaleCreate
 from domains.shop.services.sale import sale_service
 from domains.shop.services.stock import stock_service
@@ -22,32 +23,48 @@ class ReceiptService:
             limit: int = 100,
             order_by: str = None,
             order_direction: Literal['asc', 'desc'] = 'asc'
-    ) -> List[ReceiptSchema]:
+    ) -> List[VanillaReceiptSchema]:
         receipts = await self.repo.get_all(
             db=db, skip=skip, limit=limit, order_by=order_by, order_direction=order_direction
         )
         return receipts
 
-    async def create_receipt(self, db: Session, *, data: ReceiptCreateWithSales, created_by: UUID4) -> ReceiptSchema:
-        # get items info
+    async def create_receipt(self, db: Session, *, data: ReceiptCreateWithSales, created_by_id: UUID4) -> ReceiptSchema:
+        # get stock info
         items = await stock_service.repo.get_many_by_ids(db=db, ids=[item.item_id for item in data.items])
 
+        # get dictionary of stock/item id for each sale and merge duplicates' quantities
+        map_data_items_to_item_id = {}
+        for item in data.items:
+            if duplicate := map_data_items_to_item_id.get(str(item.item_id)):
+                duplicate.quantity += item.quantity
+                map_data_items_to_item_id[str(item.item_id)] = duplicate
+            else:
+                map_data_items_to_item_id[str(item.item_id)] = item
+
         # perform validations
-        total_cost = sum([item.selling_price * item.quantity for item in items])
+        for item in items:
+            if not item.is_available: raise ValueError(
+                f"{item.name.title()} is currently not available."
+            )
+            update_obj = map_data_items_to_item_id.get(str(item.id), None)
+            if update_obj and update_obj.quantity > item.quantity: raise ValueError(
+                f"{item.name.title()} is currently not available. Short of {update_obj.quantity - item.quantity}"
+            )
+
+        total_cost = sum([item.selling_price * map_data_items_to_item_id[str(item.id)].quantity for item in items])
         if total_cost < data.amount_paid: raise ValueError(
             "Paid amount should be more than the total cost."
         )
-        for item in items:
-            if not item.is_available: raise ValueError(
-                f"{item.name} is currently not available."
-            )
 
         # create receipt obj
-        receipt = await self.repo.create(db=db, data=ReceiptCreateInternal(
-            amount_paid=data.amount_paid,
-            created_by_id=data.created_by_id,
-            total_cost=total_cost,
-        ))
+        receipt = await self.repo.create(
+            db=db,
+            created_by_id=created_by_id,
+            data=ReceiptCreateInternal(
+                amount_paid=data.amount_paid,
+                total_cost=total_cost,
+            ))
 
         # create associated sales
         await asyncio.gather(*[
@@ -55,7 +72,7 @@ class ReceiptService:
                 quantity=item.quantity,
                 item_id=item.item_id,
                 receipt_id=receipt.id,
-                created_by_id=created_by,
+                created_by_id=created_by_id,
             )) for item in data.items
         ])
         return receipt

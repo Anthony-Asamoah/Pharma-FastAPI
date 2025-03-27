@@ -14,5 +14,5 @@ class Sale(BaseModel):
     receipt_id = Column(UUID, ForeignKey("receipts.id"), nullable=False)
     created_by_id = Column(UUID, ForeignKey("users.id"), nullable=False)
 
-    item = relationship("Stock", back_populates="sale")
+    item = relationship("Stock", back_populates="sales")
     receipt = relationship("Receipt", back_populates="items")

@@ -128,7 +128,7 @@ class BaseCRUDRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType])
         if not ids: return []
         try:
             results = db.query(self.model).filter(self.model.id.in_(ids)).all()
-            missing_ids = set(ids) - {obj.id for obj in results}
+            missing_ids = {str(i) for i in ids} - {str(obj.id) for obj in results}
             if missing_ids: raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Records not found for {len(missing_ids)} objs with id: {missing_ids}"

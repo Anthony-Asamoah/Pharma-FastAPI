@@ -16,7 +16,7 @@ stock_router = APIRouter(prefix="/stock")
 
 @stock_router.get(
     "",
-    response_model=List[schemas.StockSchema],
+    response_model=List[schemas.VanillaStockSchema],
 )
 async def list_stocks(
         *, db: Session = Depends(get_db),
@@ -84,6 +84,6 @@ async def delete_stock(
         *, db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user),
         id: UUID4,
-        soft=True
+        soft: bool = True
 ) -> None:
     await actions.delete_stock(db=db, id=id, soft=soft)

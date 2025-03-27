@@ -39,7 +39,7 @@ class Base:
 
 class BaseModel(Base):
     __abstract__ = True
-    id = Column(UUID, default=lambda: uuid4().hex, primary_key=True)
+    id = Column(UUID(as_uuid=True), default=uuid4, primary_key=True)
     created_at = Column(
         DateTime(timezone=True),
         default=pendulum.now,

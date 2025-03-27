@@ -1,12 +1,14 @@
 from typing import Any
 
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.status import HTTP_400_BAD_REQUEST
 from uvicorn import run
 
 from apis.routers import router
 from config.event import event_manager
 from config.settings import AppSettings, settings
+from utils.exceptions.exc_500 import http_500_exc_internal_server_error
 
 
 class App:
@@ -36,6 +38,20 @@ def initialize_application() -> FastAPI:
 
 
 app = initialize_application()
+
+
+@app.exception_handler(ValueError)
+async def generic_exception_handler(request: Request, exc: Exception):
+    raise HTTPException(
+        status_code=HTTP_400_BAD_REQUEST,
+        detail=str(exc),
+    )
+
+
+@app.exception_handler(Exception)
+async def generic_exception_handler(request: Request, exc: Exception):
+    raise await http_500_exc_internal_server_error()
+
 
 if __name__ == "__main__":
     run(

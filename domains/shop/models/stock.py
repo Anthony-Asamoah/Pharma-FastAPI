@@ -18,7 +18,8 @@ class Stock(BaseModel):
     total_issues_cost = Column(Float, default=0)
     created_by_id = Column(UUID, ForeignKey("users.id"), nullable=False)
 
-    sale = relationship("Sale", back_populates="item")
+    created_by = relationship("User")
+    sales = relationship("Sale", back_populates="item")
 
     @property
     def stock_value(self) -> float:

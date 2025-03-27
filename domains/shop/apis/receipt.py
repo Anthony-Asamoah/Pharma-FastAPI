@@ -16,7 +16,7 @@ receipt_router = APIRouter(prefix="/receipts")
 
 @receipt_router.get(
     "",
-    response_model=List[schemas.ReceiptSchema],
+    response_model=List[schemas.VanillaReceiptSchema],
 )
 async def list_receipts(
         *, db: Session = Depends(get_db),
@@ -42,7 +42,7 @@ async def create_receipt(
         current_user: User = Depends(get_current_user),
         data: schemas.ReceiptCreateWithSales
 ) -> Any:
-    receipt = await actions.create_receipt(db=db, data=data, created_by=current_user.id)
+    receipt = await actions.create_receipt(db=db, data=data, created_by_id=current_user.id)
     return receipt
 
 

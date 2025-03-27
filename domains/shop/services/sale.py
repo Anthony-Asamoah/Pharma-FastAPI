@@ -18,7 +18,7 @@ class SaleService:
         sales_count = await self.repo.get_sales_count_for_stock(db=db, stock_id=stock_id)
         return sales_count
 
-    async def get_total_sales_amount_for_stock(self, db: Session, stock_id: UUID4 = None) -> int:
+    async def get_total_sales_amount_for_stock(self, db: Session, stock_id: UUID4 = None) -> float:
         sales_amount = await self.repo.get_total_sales_amount_for_stock(db=db, stock_id=stock_id)
         return sales_amount
 

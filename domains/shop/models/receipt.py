@@ -11,6 +11,7 @@ class Receipt(BaseModel):
     amount_paid = Column(Float, nullable=False)
     created_by_id = Column(UUID, ForeignKey("users.id"), nullable=False)
 
+    created_by = relationship("User")
     items = relationship("Sale", back_populates="receipt")
 
     @property

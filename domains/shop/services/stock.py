@@ -4,7 +4,7 @@ from pydantic import UUID4
 from sqlalchemy.orm import Session
 
 from domains.shop.repositories.stock import stock_actions as stock_repo
-from domains.shop.schemas.stock import StockSchema, StockUpdate, StockCreate, StockUpdateInternal
+from domains.shop.schemas.stock import StockSchema, StockUpdate, StockCreate, StockUpdateInternal, VanillaStockSchema
 
 
 class StockService:
@@ -26,7 +26,7 @@ class StockService:
             limit: int = 100,
             order_by: str = None,
             order_direction: Literal['asc', 'desc'] = 'asc'
-    ) -> List[StockSchema]:
+    ) -> List[VanillaStockSchema]:
         stocks = await self.repo.get_all(
             db=db, skip=skip, limit=limit, order_by=order_by, order_direction=order_direction
         )
