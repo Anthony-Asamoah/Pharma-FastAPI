@@ -53,7 +53,7 @@ class ReceiptService:
             )
 
         total_cost = sum([item.selling_price * map_data_items_to_item_id[str(item.id)].quantity for item in items])
-        if total_cost < data.amount_paid: raise ValueError(
+        if total_cost > data.amount_paid: raise ValueError(
             "Paid amount should be more than the total cost."
         )
 

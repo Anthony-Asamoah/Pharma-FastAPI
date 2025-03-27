@@ -131,7 +131,7 @@ class BaseCRUDRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType])
             missing_ids = {str(i) for i in ids} - {str(obj.id) for obj in results}
             if missing_ids: raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Records not found for {len(missing_ids)} objs with id: {missing_ids}"
+                detail=f"{self.model.__name__} not found",
             )
             return results
         except HTTPException:
@@ -170,8 +170,8 @@ class BaseCRUDRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType])
         query = db.query(self.model)
         try:
             if is_deleted is not None: query = query.filter(self.model.deleted_at__is_null == (not is_deleted))
-            if time_range_min: query = query.filter(self.model.created_at <= time_range_min)
-            if time_range_max: query = query.filter(self.model.created_at >= time_range_max)
+            if time_range_min: query = query.filter(self.model.created_at >= time_range_min)
+            if time_range_max: query = query.filter(self.model.created_at <= time_range_max)
             if order_by:
                 try:
                     order_column = getattr(self.model, order_by)

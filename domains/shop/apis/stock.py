@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Any, List, Literal
 
 from fastapi import APIRouter, Depends, status
@@ -24,10 +25,20 @@ async def list_stocks(
         skip: int = 0,
         limit: int = 100,
         order_by: str = None,
-        order_direction: Literal['asc', 'desc'] = 'asc'
+        order_direction: Literal['asc', 'desc'] = 'asc',
+        quantity_min: int = None,
+        quantity_max: int = None,
+        expiry_date_min: date = None,
+        expiry_date_max: date = None,
+        selling_price_min: float = None,
+        selling_price_max: float = None,
 ) -> Any:
     stocks = await actions.list_stocks(
-        db=db, skip=skip, limit=limit, order_by=order_by, order_direction=order_direction
+        db=db, skip=skip, limit=limit,
+        order_by=order_by, order_direction=order_direction,
+        quantity_min=quantity_min, quantity_max=quantity_max,
+        expiry_date_min=expiry_date_min, expiry_date_max=expiry_date_max,
+        selling_price_min=selling_price_min, selling_price_max=selling_price_max,
     )
     return stocks
 

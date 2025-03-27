@@ -16,4 +16,4 @@ class Receipt(BaseModel):
 
     @property
     def balance(self):
-        return self.total_cost - self.amount_paid
+        return self.amount_paid - self.total_cost
