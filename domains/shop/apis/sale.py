@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any, List, Literal
 
 from fastapi import APIRouter, Depends, status
@@ -25,10 +26,17 @@ async def list_sales(
         skip: int = 0,
         limit: int = 100,
         order_by: str = None,
-        order_direction: Literal['asc', 'desc'] = 'asc'
+        order_direction: Literal['asc', 'desc'] = 'asc',
+        time_range_min: datetime = None,
+        time_range_max: datetime = None,
+        is_refunded: bool = None
 ) -> Any:
     sales = await actions.list_sales(
-        db=db, skip=skip, limit=limit, order_by=order_by, order_direction=order_direction
+        db=db,
+        skip=skip, limit=limit,
+        order_by=order_by, order_direction=order_direction,
+        time_range_min=time_range_min, time_range_max=time_range_max,
+        is_refunded=is_refunded
     )
     return sales
 

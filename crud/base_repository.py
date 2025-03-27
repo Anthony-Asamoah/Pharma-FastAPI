@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import (
     Any, Dict, Generic, List, Optional, Type, TypeVar, Union, Literal
 )
@@ -145,7 +146,10 @@ class BaseCRUDRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType])
             skip: int = 0,
             limit: int = 100,
             order_by: Optional[str] = None,
-            order_direction: Literal['asc', 'desc'] = 'asc'
+            order_direction: Literal['asc', 'desc'] = 'asc',
+            time_range_min: datetime = None,
+            time_range_max: datetime = None,
+            is_deleted: bool = None
     ) -> List[ModelType]:
         """
         Retrieve all records with pagination and ordering.
@@ -156,12 +160,18 @@ class BaseCRUDRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType])
             limit: Maximum number of records to return
             order_by: Field to order by
             order_direction: Sort direction ('asc' or 'desc')
+            time_range_min: Get records after this time
+            time_range_max: Get records before this time
+            is_deleted: Get records that have been marked as deleted or not
 
         Returns:
             List[ModelType]: List of records
         """
         query = db.query(self.model)
         try:
+            if is_deleted is not None: query = query.filter(self.model.deleted_at__is_null == (not is_deleted))
+            if time_range_min: query = query.filter(self.model.created_at <= time_range_min)
+            if time_range_max: query = query.filter(self.model.created_at >= time_range_max)
             if order_by:
                 try:
                     order_column = getattr(self.model, order_by)

@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Optional, Literal
 
 from pydantic import UUID4
@@ -26,10 +27,16 @@ class SaleService:
             skip: int = 0,
             limit: int = 100,
             order_by: str = None,
-            order_direction: Literal['asc', 'desc'] = 'asc'
+            order_direction: Literal['asc', 'desc'] = 'asc',
+            time_range_min: datetime = None,
+            time_range_max: datetime = None,
+            is_refunded: bool = None
     ) -> List[SaleSchema]:
         sales = await self.repo.get_all(
-            db=db, skip=skip, limit=limit, order_by=order_by, order_direction=order_direction
+            db=db, skip=skip, limit=limit,
+            order_by=order_by, order_direction=order_direction,
+            time_range_min=time_range_min, time_range_max=time_range_max,
+            is_deleted=is_refunded,
         )
         return sales
 
