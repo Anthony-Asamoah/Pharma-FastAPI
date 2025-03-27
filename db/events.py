@@ -9,7 +9,7 @@ from db.session import engine, SessionLocal
 from db.table import Base
 
 
-@event.listens_for(target=engine, identifier="connect")
+# @event.listens_for(target=engine, identifier="connect")
 def inspect_db_server_on_connection(
         db_connection: Connection, connection_record: Any
 ) -> None:
@@ -23,7 +23,7 @@ def inspect_db_server_on_connection(
     log.info(f"Connection Record ---\n {connection_record}")
 
 
-@event.listens_for(target=engine, identifier="close")
+# @event.listens_for(target=engine, identifier="close")
 def inspect_db_server_on_close(
         db_connection: Connection, connection_record: Any
 ) -> None:
