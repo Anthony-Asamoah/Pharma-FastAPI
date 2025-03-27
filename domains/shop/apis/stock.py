@@ -1,6 +1,7 @@
 from datetime import date
 from typing import Any, List, Literal
 
+import pendulum
 from fastapi import APIRouter, Depends, status
 from pydantic import UUID4
 from sqlalchemy.orm import Session
@@ -17,6 +18,7 @@ stock_router = APIRouter(prefix="/stock")
 
 @stock_router.get(
     "",
+    description="Get a list of available stock in alphabetical order",
     response_model=List[schemas.VanillaStockSchema],
 )
 async def list_stocks(
@@ -24,12 +26,12 @@ async def list_stocks(
         current_user: User = Depends(get_current_user),
         skip: int = 0,
         limit: int = 100,
-        order_by: str = None,
+        order_by: str = "name",
         order_direction: Literal['asc', 'desc'] = 'asc',
         search: str = None,
-        quantity_min: int = None,
+        quantity_min: int = 1,
         quantity_max: int = None,
-        expiry_date_min: date = None,
+        expiry_date_min: date = pendulum.now().date(),
         expiry_date_max: date = None,
         selling_price_min: float = None,
         selling_price_max: float = None,
