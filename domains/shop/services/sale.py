@@ -50,7 +50,9 @@ class SaleService:
         return sale
 
     async def delete_sale(self, db: Session, *, id: UUID4) -> None:
-        await self.repo.delete(db=db, id=id, soft=False)
+        sale = await self.repo.get_by_id(db=db, id=id)
+        await stock_service.return_stock(db=db, id=sale.item_id, quantity=sale.quantity)
+        await self.repo.delete(db=db, id=id, soft=True)
 
     async def get_sale_by_keywords(
             self, db: Session, *,

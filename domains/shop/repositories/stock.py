@@ -1,3 +1,7 @@
+from pydantic import UUID4
+from sqlalchemy import update
+from sqlalchemy.orm import Session
+
 from crud.base_repository import BaseCRUDRepository
 from domains.shop.models.stock import Stock
 from domains.shop.schemas.stock import (
@@ -6,7 +10,12 @@ from domains.shop.schemas.stock import (
 
 
 class CRUDStock(BaseCRUDRepository[Stock, StockCreateInternal, StockUpdateInternal]):
-    pass
+    async def return_stock(self, db: Session, id: UUID4, quantity: int) -> None:
+        db.execute(
+            update(Stock)
+            .where(Stock.id == id)
+            .values(quantity=Stock.quantity + quantity)
+        )
 
 
 stock_actions = CRUDStock(Stock)

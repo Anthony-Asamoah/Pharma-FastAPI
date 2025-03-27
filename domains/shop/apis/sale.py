@@ -16,6 +16,7 @@ sale_router = APIRouter(prefix="/sales")
 
 @sale_router.get(
     "",
+    name="list_all_sold_items",
     response_model=List[schemas.SaleSchema],
 )
 async def list_sales(
@@ -32,11 +33,11 @@ async def list_sales(
     return sales
 
 
-@sale_router.post(
-    "",
-    response_model=schemas.SaleSchema,
-    status_code=status.HTTP_201_CREATED,
-)
+# @sale_router.post(
+#     "",
+#     response_model=schemas.SaleSchema,
+#     status_code=status.HTTP_201_CREATED,
+# )
 async def create_sale(
         *, db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user),
@@ -46,11 +47,11 @@ async def create_sale(
     return sale
 
 
-@sale_router.put(
-    "/{id}",
-    response_model=schemas.SaleSchema,
-    responses={status.HTTP_404_NOT_FOUND: {"model": HTTPError}},
-)
+# @sale_router.put(
+#     "/{id}",
+#     response_model=schemas.SaleSchema,
+#     responses={status.HTTP_404_NOT_FOUND: {"model": HTTPError}},
+# )
 async def update_sale(
         *, db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user),
@@ -63,6 +64,7 @@ async def update_sale(
 
 @sale_router.get(
     "/{id}",
+    name="get_a_sold_item",
     response_model=schemas.SaleSchema,
     responses={status.HTTP_404_NOT_FOUND: {"model": HTTPError}},
 )
@@ -77,6 +79,7 @@ async def get_sale(
 
 @sale_router.delete(
     "/{id}",
+    name="refund_an_item",
     status_code=status.HTTP_204_NO_CONTENT,
     responses={status.HTTP_404_NOT_FOUND: {"model": HTTPError}},
 )
