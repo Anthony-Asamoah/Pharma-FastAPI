@@ -8,15 +8,18 @@ from crud.base_schema import HTTPError
 from db.session import get_db
 from domains.auth.models import User
 from domains.auth.oauth import get_current_user
+from domains.auth.rbac import check_user_role
 from domains.auth.schemas import permission as schemas
 from domains.auth.services.permission import permission_service as actions
 
 permission_router = APIRouter(prefix="/permissions")
+allowed_roles = ['SuperAdmin', 'Admin']
 
 
 @permission_router.get(
     "",
     response_model=List[schemas.PermissionSchema],
+    dependencies=[Depends(check_user_role(allowed_roles))],
 )
 async def list_permissions(
         *, db: Session = Depends(get_db),
@@ -36,6 +39,7 @@ async def list_permissions(
     "",
     response_model=schemas.PermissionSchema,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(check_user_role(allowed_roles))],
 )
 async def create_permission(
         *, db: Session = Depends(get_db),
@@ -50,6 +54,7 @@ async def create_permission(
     "/{id}",
     response_model=schemas.PermissionSchema,
     responses={status.HTTP_404_NOT_FOUND: {"model": HTTPError}},
+    dependencies=[Depends(check_user_role(allowed_roles))],
 )
 async def update_permission(
         *, db: Session = Depends(get_db),
@@ -65,6 +70,7 @@ async def update_permission(
     "/{id}",
     response_model=schemas.PermissionSchema,
     responses={status.HTTP_404_NOT_FOUND: {"model": HTTPError}},
+    dependencies=[Depends(check_user_role(allowed_roles))],
 )
 async def get_permission(
         *, db: Session = Depends(get_db),
@@ -79,6 +85,7 @@ async def get_permission(
     "/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
     responses={status.HTTP_404_NOT_FOUND: {"model": HTTPError}},
+    dependencies=[Depends(check_user_role(allowed_roles))],
 )
 async def delete_permission(
         *, db: Session = Depends(get_db),

@@ -32,6 +32,5 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Se
     if user.is_deleted: raise credentials_exception
 
     is_blacklisted = await revoked_token_service.get_revoked_token_by_jti(db=db, jti=token.strip())
-    print("is_blacklisted", is_blacklisted)
     if is_blacklisted: raise credentials_exception
     return user

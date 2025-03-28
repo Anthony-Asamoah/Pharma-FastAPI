@@ -8,15 +8,18 @@ from crud.base_schema import HTTPError
 from db.session import get_db
 from domains.auth.models import User
 from domains.auth.oauth import get_current_user
+from domains.auth.rbac import check_user_role
 from domains.auth.schemas import role as schemas
 from domains.auth.services.role import role_service as actions
 
 role_router = APIRouter(prefix="/roles")
+allowed_roles = ['SuperAdmin', 'Admin', 'Manager']
 
 
 @role_router.get(
     "",
     response_model=List[schemas.RoleSchema],
+    dependencies=[Depends(check_user_role(allowed_roles))],
 )
 async def list_roles(
         *, db: Session = Depends(get_db),
@@ -36,6 +39,7 @@ async def list_roles(
     "",
     response_model=schemas.RoleSchema,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(check_user_role(allowed_roles))],
 )
 async def create_role(
         *, db: Session = Depends(get_db),
@@ -50,6 +54,7 @@ async def create_role(
     "/{id}",
     response_model=schemas.RoleSchema,
     responses={status.HTTP_404_NOT_FOUND: {"model": HTTPError}},
+    dependencies=[Depends(check_user_role(allowed_roles))],
 )
 async def update_role(
         *, db: Session = Depends(get_db),
@@ -65,6 +70,7 @@ async def update_role(
     "/{id}",
     response_model=schemas.RoleSchema,
     responses={status.HTTP_404_NOT_FOUND: {"model": HTTPError}},
+    dependencies=[Depends(check_user_role(allowed_roles))],
 )
 async def get_role_by_id(
         *, db: Session = Depends(get_db),
@@ -79,6 +85,7 @@ async def get_role_by_id(
     "/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
     responses={status.HTTP_404_NOT_FOUND: {"model": HTTPError}},
+    dependencies=[Depends(check_user_role(allowed_roles))],
 )
 async def delete_role(
         *, db: Session = Depends(get_db),
@@ -92,6 +99,7 @@ async def delete_role(
     "/{id}/permissions",
     response_model=schemas.RoleSchema,
     responses={status.HTTP_404_NOT_FOUND: {"model": HTTPError}},
+    dependencies=[Depends(check_user_role(allowed_roles))],
 )
 async def add_permissions_to_role(
         *, db: Session = Depends(get_db),
@@ -108,6 +116,7 @@ async def add_permissions_to_role(
     "/{id}/permissions",
     response_model=dict[str, Any],
     responses={status.HTTP_404_NOT_FOUND: {"model": HTTPError}},
+    dependencies=[Depends(check_user_role(allowed_roles))],
 )
 async def remove_permissions_from_role(
         *, db: Session = Depends(get_db),

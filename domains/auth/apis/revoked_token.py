@@ -8,15 +8,18 @@ from crud.base_schema import HTTPError
 from db.session import get_db
 from domains.auth.models import User
 from domains.auth.oauth import get_current_user
+from domains.auth.rbac import check_user_role
 from domains.auth.schemas import revoked_token as schemas
 from domains.auth.services.revoked_token import revoked_token_service as actions
 
 revoked_token_router = APIRouter(prefix="/revoked_tokens")
+allowed_roles = ["SuperAdmin", "Admin"]
 
 
 @revoked_token_router.get(
     "",
     response_model=List[schemas.RevokedTokenSchema],
+    dependencies=[Depends(check_user_role(allowed_roles))],
 )
 async def list_revoked_tokens(
         *, db: Session = Depends(get_db),
@@ -36,6 +39,7 @@ async def list_revoked_tokens(
     "",
     response_model=schemas.RevokedTokenSchema,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(check_user_role(allowed_roles))],
 )
 async def create_revoked_token(
         *, db: Session = Depends(get_db),
@@ -50,6 +54,7 @@ async def create_revoked_token(
     "/{id}",
     response_model=schemas.RevokedTokenSchema,
     responses={status.HTTP_404_NOT_FOUND: {"model": HTTPError}},
+    dependencies=[Depends(check_user_role(allowed_roles))],
 )
 async def update_revoked_token(
         *, db: Session = Depends(get_db),
@@ -65,6 +70,7 @@ async def update_revoked_token(
     "/{id}",
     response_model=schemas.RevokedTokenSchema,
     responses={status.HTTP_404_NOT_FOUND: {"model": HTTPError}},
+    dependencies=[Depends(check_user_role(allowed_roles))],
 )
 async def get_revoked_token(
         *, db: Session = Depends(get_db),
@@ -79,6 +85,7 @@ async def get_revoked_token(
     "/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
     responses={status.HTTP_404_NOT_FOUND: {"model": HTTPError}},
+    dependencies=[Depends(check_user_role(allowed_roles))],
 )
 async def delete_revoked_token(
         *, db: Session = Depends(get_db),

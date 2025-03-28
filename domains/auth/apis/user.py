@@ -9,17 +9,20 @@ from crud.base_schema import HTTPError
 from db.session import get_db
 from domains.auth.models import User
 from domains.auth.oauth import get_current_user
+from domains.auth.rbac import check_user_role
 from domains.auth.schemas import user as schemas
 from domains.auth.schemas.permission import PermissionSchema
 from domains.auth.schemas.role import RoleSchema
 from domains.auth.services.user import user_service as actions
 
 user_router = APIRouter(prefix="/users")
+allowed_roles = ['SuperAdmin', 'Manager']
 
 
 @user_router.get(
     "",
     response_model=List[schemas.UserSchema],
+    dependencies=[Depends(check_user_role(allowed_roles))],
 )
 async def list_users(
         *, db: Session = Depends(get_db),
@@ -47,6 +50,7 @@ async def list_users(
     "",
     response_model=schemas.UserSchema,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(check_user_role(allowed_roles))]
 )
 async def create_user(
         *, db: Session = Depends(get_db),
@@ -76,6 +80,7 @@ async def update_user(
     "/{id}",
     response_model=schemas.UserSchema,
     responses={status.HTTP_404_NOT_FOUND: {"model": HTTPError}},
+    dependencies=[Depends(check_user_role(allowed_roles))],
 )
 async def get_user(
         *, db: Session = Depends(get_db),
@@ -91,6 +96,7 @@ async def get_user(
     name="suspend_account",
     status_code=status.HTTP_204_NO_CONTENT,
     responses={status.HTTP_404_NOT_FOUND: {"model": HTTPError}},
+    dependencies=[Depends(check_user_role(allowed_roles))],
 )
 async def delete_user(
         *, db: Session = Depends(get_db),
@@ -133,6 +139,7 @@ async def set_roles_on_user(
     "/{id}/roles",
     response_model=schemas.UserSchema,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(check_user_role(allowed_roles))],
 )
 async def add_role_to_user(
         *, db: Session = Depends(get_db),
@@ -149,6 +156,7 @@ async def add_role_to_user(
     "/{id}/roles",
     response_model=schemas.UserSchema,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(check_user_role(allowed_roles))],
 )
 async def remove_role_from_user(
         *, db: Session = Depends(get_db),
@@ -178,6 +186,7 @@ async def get_user_permissions(
     "/{id}/permissions",
     response_model=schemas.UserSchema,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(check_user_role(allowed_roles))],
 )
 async def set_permissions_on_user(
         *, db: Session = Depends(get_db),
@@ -194,6 +203,7 @@ async def set_permissions_on_user(
     "/{id}/permissions",
     response_model=schemas.UserSchema,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(check_user_role(allowed_roles))],
 )
 async def add_permission_to_user(
         *, db: Session = Depends(get_db),
@@ -210,6 +220,7 @@ async def add_permission_to_user(
     "/{id}/permissions",
     response_model=schemas.UserSchema,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(check_user_role(allowed_roles))],
 )
 async def remove_permission_from_user(
         *, db: Session = Depends(get_db),
