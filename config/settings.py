@@ -76,8 +76,8 @@ class AppSettings(BaseSettings):
     )
 
     # jwt
-    ACCESS_TOKEN_EXPIRES_IN: int = 15 * 2400
-    REFRESH_TOKEN_EXPIRES_IN: int = 30
+    ACCESS_TOKEN_EXPIRES_IN: int = 60
+    REFRESH_TOKEN_EXPIRES_IN: int = 60 * 24
     ALGORITHM: str = "HS256"
     JWT_SECRET_KEY: str = "7b6c506ee07337cc3d02536d5119c4b2"
     JWT_PRIVATE_KEY: str = "sec31d048faecfc812b7835718dac4dd74eac8e3eet"
