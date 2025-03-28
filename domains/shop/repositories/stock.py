@@ -1,9 +1,9 @@
-from datetime import date
+from datetime import date, datetime
 from typing import Literal
 
 from fastapi import HTTPException
 from pydantic import UUID4
-from sqlalchemy import update, desc
+from sqlalchemy import update, desc, func
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
@@ -17,6 +17,19 @@ from utils.exceptions.exc_500 import http_500_exc_internal_server_error
 
 
 class CRUDStock(BaseCRUDRepository[Stock, StockCreateInternal, StockUpdateInternal]):
+
+    async def get_total_purchase_price(
+            self, db: Session,
+            time_range_min: datetime = None,
+            time_range_max: datetime = None
+    ) -> float:
+        query = (db.query(func.sum(Stock.purchase_price))
+                 .filter(Stock.deleted_at.is_(None)))
+        if time_range_min: query = query.filter(time_range_min >= Stock.created_at)
+        if time_range_max: query = query.filter(time_range_max <= Stock.created_at)
+        result = query.scalar() or 0.00
+        return round(result, 2)
+
     async def return_an_item(self, db: Session, id: UUID4, quantity: int) -> None:
         db.execute(
             update(Stock)

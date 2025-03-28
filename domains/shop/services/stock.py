@@ -2,10 +2,12 @@ from datetime import date
 from typing import List, Optional, Literal
 from uuid import uuid4
 
+import pendulum
 from pydantic import UUID4
 from sqlalchemy.orm import Session
 
 from domains.shop.repositories.stock import stock_actions as stock_repo
+from domains.shop.schemas.dashboard import TotalStockValueAndDailySaleSchema
 from domains.shop.schemas.stock import StockSchema, StockUpdate, StockCreate, StockUpdateInternal, VanillaStockSchema
 
 
@@ -101,6 +103,22 @@ class StockService:
             db=db, skip=skip, limit=limit, order_by=order_by, order_direction=order_direction, **kwargs
         )
         return stocks
+
+    async def assemble_dash(
+            self, db: Session
+    ) -> TotalStockValueAndDailySaleSchema:
+        from domains.shop.services.sale import sale_service
+
+        # default period is 1 day
+        time_range_min = pendulum.today()
+        time_range_max = pendulum.tomorrow()
+
+        return TotalStockValueAndDailySaleSchema(
+            total_purchase_price=await self.repo.get_total_purchase_price(db=db),
+            total_sell_price=await sale_service.repo.get_sales_amount_for_date_range(
+                db=db, time_range_min=time_range_min, time_range_max=time_range_max
+            ),
+        )
 
 
 stock_service = StockService()

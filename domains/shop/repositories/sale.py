@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import UUID4
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -10,11 +12,25 @@ from domains.shop.schemas.sale import (
 
 
 class CRUDSale(BaseCRUDRepository[Sale, SaleCreateInternal, SaleUpdate]):
+
+    async def get_sales_amount_for_date_range(
+            self, db: Session, *,
+            time_range_min: datetime,
+            time_range_max: datetime
+    ) -> float:
+        query = (
+            db.query(func.sum(Sale.cost))
+            .filter(time_range_min >= Sale.created_at, time_range_max <= Sale.created_at)
+            .filter(Sale.deleted_at.is_(None))
+        )
+        result = query.scalar() or 0.0
+        return round(result, 2)
+
     async def get_sales_count_for_stock(self, db: Session, stock_id: UUID4) -> int:
         query = (
             db.query(Sale)
             .filter(Sale.item_id == stock_id)
-            .filter(Sale.deleted_at.isnot(None))
+            .filter(Sale.deleted_at.is_(None))
             .count()
         )
         return query
@@ -23,7 +39,7 @@ class CRUDSale(BaseCRUDRepository[Sale, SaleCreateInternal, SaleUpdate]):
         total_sales_amount = (
                 db.query(func.sum(Sale.cost))
                 .filter(Sale.item_id == stock_id)
-                .filter(Sale.deleted_at.isnot(None))
+                .filter(Sale.deleted_at.is_(None))
                 .scalar() or 0.0
         )
         return total_sales_amount

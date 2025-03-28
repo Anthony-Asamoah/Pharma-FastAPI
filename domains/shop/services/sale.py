@@ -90,4 +90,5 @@ class SaleService:
         return sales
 
 
+
 sale_service = SaleService()
