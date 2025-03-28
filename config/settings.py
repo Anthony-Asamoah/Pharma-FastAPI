@@ -84,6 +84,8 @@ class AppSettings(BaseSettings):
     JWT_PUBLIC_KEY: str = "faecfc812b7835718dac4dd74ea"
     JWT_REFRESH_KEY: str = "048faeba7203f5fdda"
 
+    intruder_list: list = []
+
     @property
     def set_app_attributes(self) -> dict[str, str | bool | None]:
         """
