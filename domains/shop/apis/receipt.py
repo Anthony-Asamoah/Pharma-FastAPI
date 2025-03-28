@@ -26,7 +26,7 @@ async def list_receipts(
         limit: int = 100,
         order_by: str = None,
         order_direction: Literal['asc', 'desc'] = 'asc',
-        is_refunded: bool = None,
+        is_refunded: bool = False,
         payment_type: str = None,
         price_from: float = None,
         price_to: float = None,

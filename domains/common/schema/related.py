@@ -9,6 +9,7 @@ class RelatedUserSchema(BaseModel):
 
 
 class RelatedStockSchema(BaseModel):
+    id: UUID4
     name: Optional[str] = None
     description: Optional[str] = None
     selling_price: Optional[float] = None

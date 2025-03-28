@@ -14,6 +14,7 @@ class CRUDSale(BaseCRUDRepository[Sale, SaleCreateInternal, SaleUpdate]):
         query = (
             db.query(Sale)
             .filter(Sale.item_id == stock_id)
+            .filter(Sale.deleted_at.isnot(None))
             .count()
         )
         return query
@@ -22,6 +23,7 @@ class CRUDSale(BaseCRUDRepository[Sale, SaleCreateInternal, SaleUpdate]):
         total_sales_amount = (
                 db.query(func.sum(Sale.cost))
                 .filter(Sale.item_id == stock_id)
+                .filter(Sale.deleted_at.isnot(None))
                 .scalar() or 0.0
         )
         return total_sales_amount

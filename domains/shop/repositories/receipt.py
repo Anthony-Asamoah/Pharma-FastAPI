@@ -32,7 +32,7 @@ class CRUDReceipt(BaseCRUDRepository[Receipt, ReceiptCreateInternal, ReceiptUpda
 
         query = db.query(Receipt)
         try:
-            if is_refunded is not None: query = query.filter(Receipt.deleted_at__is_null == (not is_refunded))
+            if is_refunded is not None: query = query.filter(Receipt.deleted_at.is_(None) == (not is_refunded))
             if payment_type: query = query.filter(Receipt.payment_type == payment_type)
 
             if price_from: query = query.filter(Receipt.total_cost >= price_from)

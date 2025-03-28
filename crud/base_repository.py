@@ -71,6 +71,8 @@ class BaseCRUDRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType])
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail=f"{self.model.__name__} not found"
             )
+        except HTTPException:
+            raise
         except SQLAlchemyError:
             log.error(f"Database error fetching {self.model.__name__} with id={id}", exc_info=True)
             raise HTTPException(
@@ -102,6 +104,8 @@ class BaseCRUDRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType])
                 status_code=status.HTTP_400_BAD_REQUEST, detail=f"{self.model.__name__} not found"
             )
             return result
+        except HTTPException:
+            raise
         except AttributeError:
             log.error(f"Invalid field {field} for model {self.model.__name__}", exc_info=True)
             raise HTTPException(
