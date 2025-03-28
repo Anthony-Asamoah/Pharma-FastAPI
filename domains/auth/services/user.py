@@ -60,7 +60,7 @@ class UserService:
         user = await self.repo.get_by_id(db=db, id=id)
         return user
 
-    async def delete_user(self, db: Session, *, id: UUID4, soft=False) -> None:
+    async def delete_user(self, db: Session, *, id: UUID4, soft=True) -> None:
         await self.repo.delete(db=db, id=id, soft=soft)
 
     async def get_user_by_keywords(
