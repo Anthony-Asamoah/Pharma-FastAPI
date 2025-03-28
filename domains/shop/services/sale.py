@@ -32,7 +32,7 @@ class SaleService:
             order_direction: Literal['asc', 'desc'] = 'asc',
             time_range_min: datetime = None,
             time_range_max: datetime = None,
-            is_refunded: bool = None
+            is_refunded: bool = False
     ) -> List[SaleSchema]:
         sales = await self.repo.get_all(
             db=db, skip=skip, limit=limit,

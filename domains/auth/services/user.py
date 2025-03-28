@@ -40,10 +40,12 @@ class UserService:
             skip: int = 0,
             limit: int = 100,
             order_by: str = None,
-            order_direction: Literal['asc', 'desc'] = 'asc'
+            order_direction: Literal['asc', 'desc'] = 'asc',
+            is_deleted: bool = False,
     ) -> List[UserSchema]:
         users = await self.repo.get_all(
-            db=db, skip=skip, limit=limit, order_by=order_by, order_direction=order_direction
+            db=db, skip=skip, limit=limit, order_by=order_by, order_direction=order_direction,
+            is_deleted=is_deleted,
         )
         return users
 

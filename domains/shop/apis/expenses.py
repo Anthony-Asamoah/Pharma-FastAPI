@@ -31,7 +31,7 @@ async def list_expenses(
         time_range_max: datetime = None,
         price_range_min: float = None,
         price_range_max: float = None,
-        is_deleted: bool = None,
+        is_deleted: bool = False,
 ) -> Any:
     expense = await actions.list_expenses(
         db=db, skip=skip, limit=limit, search=search, is_deleted=is_deleted,

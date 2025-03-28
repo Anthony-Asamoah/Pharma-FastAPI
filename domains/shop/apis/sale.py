@@ -29,7 +29,7 @@ async def list_sales(
         order_direction: Literal['asc', 'desc'] = 'asc',
         time_range_min: datetime = None,
         time_range_max: datetime = None,
-        is_refunded: bool = None
+        is_refunded: bool = False
 ) -> Any:
     sales = await actions.list_sales(
         db=db,
