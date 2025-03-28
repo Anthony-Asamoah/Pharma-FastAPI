@@ -1,10 +1,12 @@
 from datetime import datetime
 from typing import List, Optional, Literal
 
+import pendulum
 from pydantic import UUID4
 from sqlalchemy.orm import Session
 
 from domains.shop.repositories.sale import sale_actions as sale_repo
+from domains.shop.schemas.dashboard import SaleSummarySchema
 from domains.shop.schemas.sale import SaleSchema, SaleUpdate, SaleCreate, SaleCreateInternal
 from domains.shop.services.stock import stock_service
 
@@ -89,6 +91,48 @@ class SaleService:
         )
         return sales
 
+    async def assemble_dash(self, db: Session) -> SaleSummarySchema:
+        daily_time_range_min = pendulum.today()
+        daily_time_range_max = pendulum.tomorrow()
+
+        monthly_time_range_min = pendulum.today()._first_of_month()
+        monthly_time_range_max = pendulum.today()._last_of_month()
+        return SaleSummarySchema(
+            monthly_net=await self.repo.get_sales_amount_for_date_range(
+                db=db,
+                time_range_min=monthly_time_range_min,
+                time_range_max=monthly_time_range_max,
+            ),
+            monthly_momo=await self.repo.get_sales_amount_for_date_range(
+                db=db,
+                time_range_min=monthly_time_range_min,
+                time_range_max=monthly_time_range_max,
+                payment_types=["MTN_MOMO", "VODAFONE CASH", "AT MONEY"]
+            ),
+            monthly_cash=await self.repo.get_sales_amount_for_date_range(
+                db=db,
+                time_range_min=monthly_time_range_min,
+                time_range_max=monthly_time_range_max,
+                payment_types=["CASH"]
+            ),
+            daily_net=await self.repo.get_sales_amount_for_date_range(
+                db=db,
+                time_range_min=daily_time_range_min,
+                time_range_max=daily_time_range_max,
+            ),
+            daily_momo=await self.repo.get_sales_amount_for_date_range(
+                db=db,
+                time_range_min=daily_time_range_min,
+                time_range_max=daily_time_range_max,
+                payment_types=["MTN_MOMO", "VODAFONE CASH", "AT MONEY"]
+            ),
+            daily_cash=await self.repo.get_sales_amount_for_date_range(
+                db=db,
+                time_range_min=daily_time_range_min,
+                time_range_max=daily_time_range_max,
+                payment_types=["CASH"]
+            ),
+        )
 
 
 sale_service = SaleService()
