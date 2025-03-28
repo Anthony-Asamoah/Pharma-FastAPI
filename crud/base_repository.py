@@ -173,7 +173,7 @@ class BaseCRUDRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType])
         """
         query = db.query(self.model)
         try:
-            if is_deleted is not None: query = query.filter(self.model.deleted_at__is_null == (not is_deleted))
+            if is_deleted is not None: query = query.filter(self.model.deleted_at.isnot(None) == is_deleted)
             if time_range_min: query = query.filter(self.model.created_at >= time_range_min)
             if time_range_max: query = query.filter(self.model.created_at <= time_range_max)
             if order_by:

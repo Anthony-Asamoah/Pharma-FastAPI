@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any, List, Literal
 
 from fastapi import APIRouter, Depends, status
@@ -24,10 +25,19 @@ async def list_expenses(
         skip: int = 0,
         limit: int = 100,
         order_by: str = None,
-        order_direction: Literal['asc', 'desc'] = 'asc'
+        order_direction: Literal['asc', 'desc'] = 'asc',
+        search: str = None,
+        time_range_min: datetime = None,
+        time_range_max: datetime = None,
+        price_range_min: float = None,
+        price_range_max: float = None,
+        is_deleted: bool = None,
 ) -> Any:
     expense = await actions.list_expenses(
-        db=db, skip=skip, limit=limit, order_by=order_by, order_direction=order_direction
+        db=db, skip=skip, limit=limit, search=search, is_deleted=is_deleted,
+        order_by=order_by, order_direction=order_direction,
+        time_range_min=time_range_min, time_range_max=time_range_max,
+        price_range_min=price_range_min, price_range_max=price_range_max,
     )
     return expense
 

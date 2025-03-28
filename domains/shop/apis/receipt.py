@@ -30,13 +30,13 @@ async def list_receipts(
         payment_type: str = None,
         price_from: float = None,
         price_to: float = None,
-        time_from: datetime = None,
-        time_to: datetime = None,
+        time_range_min: datetime = None,
+        time_range_max: datetime = None,
 ) -> Any:
     receipts = await actions.list_receipts(
         db=db, skip=skip, limit=limit,
         order_by=order_by, order_direction=order_direction,
-        time_from=time_from, time_to=time_to,
+        time_range_min=time_range_min, time_range_max=time_range_max,
         price_from=price_from, price_to=price_to,
         is_refunded=is_refunded, payment_type=payment_type
     )

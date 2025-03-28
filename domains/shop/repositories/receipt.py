@@ -26,8 +26,8 @@ class CRUDReceipt(BaseCRUDRepository[Receipt, ReceiptCreateInternal, ReceiptUpda
             payment_type: str = None,
             price_from: float = None,
             price_to: float = None,
-            time_from: datetime = None,
-            time_to: datetime = None,
+            time_range_min: datetime = None,
+            time_range_max: datetime = None,
     ) -> List[Receipt]:
 
         query = db.query(Receipt)
@@ -38,8 +38,8 @@ class CRUDReceipt(BaseCRUDRepository[Receipt, ReceiptCreateInternal, ReceiptUpda
             if price_from: query = query.filter(Receipt.total_cost >= price_from)
             if price_to: query = query.filter(Receipt.total_cost <= price_to)
 
-            if time_from: query = query.filter(Receipt.created_at >= time_from)
-            if time_to: query = query.filter(Receipt.created_at <= time_to)
+            if time_range_min: query = query.filter(Receipt.created_at >= time_range_min)
+            if time_range_max: query = query.filter(Receipt.created_at <= time_range_max)
             if order_by:
                 try:
                     order_column = getattr(Receipt, order_by)
