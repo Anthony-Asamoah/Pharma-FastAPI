@@ -71,7 +71,7 @@ async def get_revoked_token(
         current_user: User = Depends(get_current_user),
         id: UUID4
 ) -> Any:
-    revoked_token = await actions.get_revoked_token(db=db, id=id)
+    revoked_token = await actions.get_revoked_token_by_id(db=db, id=id)
     return revoked_token
 
 

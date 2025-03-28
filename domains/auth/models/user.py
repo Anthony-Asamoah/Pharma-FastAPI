@@ -34,6 +34,10 @@ class User(BaseModel):
     roles = relationship("Role", secondary="user_roles", back_populates="users")
     permissions = relationship("Permission", secondary="user_permissions", back_populates="users")
 
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}"
+
     def __str__(self):
         return f"{self.username}"
 

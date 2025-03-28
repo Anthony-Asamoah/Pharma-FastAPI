@@ -10,8 +10,10 @@ from domains.auth.models import User
 from domains.auth.oauth.authenticate_user import pwd_context
 from domains.auth.repositories.user import user_actions as user_repo
 from domains.auth.schemas.permission import PermissionSchema
+from domains.auth.schemas.revoked_token import RevokedTokenCreate
 from domains.auth.schemas.role import RoleSchema
 from domains.auth.schemas.user import UserSchema, UserUpdate, UserCreate, ChangePasswordSchema
+from domains.auth.services.revoked_token import revoked_token_service
 
 
 class UserService:
@@ -141,7 +143,8 @@ class UserService:
     async def remove_roles(self, db: Session, user_id, role_ids: List[UUID4]) -> Any:
         return await self.repo.remove_roles(db, user_id, role_ids)
 
-    async def log_out(self, db: Session, user: User):
+    async def logout(self, db: Session, *, token: str):
+        await revoked_token_service.create_revoked_token(db=db, revoked_token_in=RevokedTokenCreate(jti=token))
         return {"message": "Logged out successfully"}
 
 

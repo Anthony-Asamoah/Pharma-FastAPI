@@ -35,7 +35,10 @@ class RevokedTokenService:
         revoked_token = await self.repo.update(db=db, db_obj=revoked_token, data=revoked_token_in)
         return revoked_token
 
-    async def get_revoked_token(self, db: Session, *, id: UUID4) -> RevokedTokenSchema:
+    async def get_revoked_token_by_jti(self, db: Session, jti: str) -> Optional[RevokedTokenSchema]:
+        return await self.repo.get_by_filters(db=db, jti=jti, limit=1)
+
+    async def get_revoked_token_by_id(self, db: Session, *, id: UUID4) -> RevokedTokenSchema:
         revoked_token = await self.repo.get_by_id(db=db, id=id)
         return revoked_token
 
