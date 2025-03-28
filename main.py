@@ -8,6 +8,7 @@ from uvicorn import run
 from apis.routers import router
 from config.event import event_manager
 from config.settings import AppSettings, settings
+from middleware.intruder_detection import IntruderDetectionMiddleware
 from utils.exceptions.exc_500 import http_500_exc_internal_server_error
 
 
@@ -25,6 +26,7 @@ class App:
             allow_methods=settings.ALLOWED_METHOD_LIST,
             allow_headers=settings.ALLOWED_HEADER_LIST,
         )
+        self.__app.add_middleware(IntruderDetectionMiddleware)
 
     def __add_routes(self, router: APIRouter, settings: AppSettings):
         self.__app.include_router(router=router, prefix=settings.API_PREFIX)
