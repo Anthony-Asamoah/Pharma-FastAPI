@@ -10,10 +10,12 @@ from crud.base_schema import HTTPError
 from db.session import get_db
 from domains.auth.models import User
 from domains.auth.oauth import get_current_user
+from domains.auth.rbac import check_user_role
 from domains.shop.schemas import stock as schemas
 from domains.shop.services.stock import stock_service as actions
 
 stock_router = APIRouter(prefix="/stock")
+allowed_roles = ["SuperAdmin", "Admin", "Manager", "Supervisor"]
 
 
 @stock_router.get(
@@ -50,6 +52,7 @@ async def list_stocks(
     "",
     response_model=schemas.StockSchema,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(check_user_role(allowed_roles))],
 )
 async def create_stock(
         *, db: Session = Depends(get_db),
@@ -64,6 +67,7 @@ async def create_stock(
     "/{id}",
     response_model=schemas.StockSchema,
     responses={status.HTTP_404_NOT_FOUND: {"model": HTTPError}},
+    dependencies=[Depends(check_user_role(allowed_roles))],
 )
 async def update_stock(
         *, db: Session = Depends(get_db),
@@ -107,6 +111,7 @@ async def get_stock_by_reference(
     "/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
     responses={status.HTTP_404_NOT_FOUND: {"model": HTTPError}},
+    dependencies=[Depends(check_user_role(allowed_roles))],
 )
 async def delete_stock(
         *, db: Session = Depends(get_db),
