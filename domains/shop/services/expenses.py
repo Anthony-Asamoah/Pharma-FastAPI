@@ -6,6 +6,7 @@ from pydantic import UUID4
 from sqlalchemy.orm import Session
 
 from domains.shop.repositories.expenses import expenses_actions as expenses_repo
+from domains.shop.schemas.dashboard import ExpensesSummarySchema
 from domains.shop.schemas.expenses import ExpensesSchema, ExpensesUpdate, ExpensesCreate
 
 
@@ -77,6 +78,20 @@ class ExpensesService:
             db=db, skip=skip, limit=limit, order_by=order_by, order_direction=order_direction, **kwargs
         )
         return expense
+
+    async def assemble_dash(self, db: Session) -> ExpensesSummarySchema:
+        return ExpensesSummarySchema(
+            monthly_net=await self.repo.get_expenses_amount_for_date_range(
+                db=db,
+                time_range_min=pendulum.today()._first_of_month(),
+                time_range_max=pendulum.today()._last_of_month(),
+            ),
+            daily_net=await self.repo.get_expenses_amount_for_date_range(
+                db=db,
+                time_range_min=pendulum.today(),
+                time_range_max=pendulum.tomorrow(),
+            )
+        )
 
 
 expenses_service = ExpensesService()

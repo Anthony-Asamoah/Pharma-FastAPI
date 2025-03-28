@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional, Literal, List
 
 from fastapi import HTTPException, status
-from sqlalchemy import desc
+from sqlalchemy import desc, func
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
@@ -65,5 +65,20 @@ class CRUDExpenses(BaseCRUDRepository[Expenses, ExpensesCreate, ExpensesUpdate])
         except:
             log.exception(f"Unexpected error in get_all {Expenses.__name__}")
             raise await http_500_exc_internal_server_error()
+
+    async def get_expenses_amount_for_date_range(
+            self, db: Session, *,
+            time_range_min: datetime,
+            time_range_max: datetime,
+    ) -> float:
+        query = (
+            db.query(func.sum(Expenses.price))
+            .filter(Expenses.paid_at >= time_range_min)
+            .filter(Expenses.paid_at <= time_range_max)
+            .filter(Expenses.deleted_at.is_(None))
+        )
+        result = query.scalar() or 0.0
+        return round(result, 2)
+
 
 expenses_actions = CRUDExpenses(Expenses)
