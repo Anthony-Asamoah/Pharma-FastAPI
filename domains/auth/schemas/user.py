@@ -26,6 +26,7 @@ class UserCreate(UserBase):
 
 
 class ChangePasswordSchema(BaseModel):
+    user_id: Optional[UUID4] = None
     old_password: str
     new_password: str
 

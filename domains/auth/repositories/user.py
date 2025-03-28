@@ -1,10 +1,12 @@
 import sys
-from typing import Union, Dict, Any, List
+from datetime import datetime
+from typing import Union, Dict, Any, List, Optional, Literal
 
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 from pydantic import UUID4
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy import desc, or_
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 from starlette import status
 
@@ -56,7 +58,7 @@ class CRUDUser(BaseCRUDRepository[User, UserCreate, UserUpdate]):
         role_ids = data_data.pop("role_ids", [])
         permission_ids = data_data.pop("permission_ids", [])
 
-        db_obj = self.model(**data_data)
+        db_obj = User(**data_data)
 
         try:
             if role_ids:
@@ -92,7 +94,10 @@ class CRUDUser(BaseCRUDRepository[User, UserCreate, UserUpdate]):
             data: Union[UserUpdate, Dict[str, Any]]
     ) -> Any:
         obj_data = jsonable_encoder(db_obj)
-        update_data = data.model_dump(exclude_unset=True)
+        if isinstance(data, dict):
+            update_data = data
+        else:
+            update_data = data.model_dump(exclude_unset=True)
 
         # related object ids m2m
         role_ids = update_data.pop("role_ids", [])
@@ -106,7 +111,7 @@ class CRUDUser(BaseCRUDRepository[User, UserCreate, UserUpdate]):
                 if roles:
                     for role in roles:
                         # add if not existing
-                        if not role in self.model.roles:
+                        if not role in User.roles:
                             db_obj.roles.append(role)
 
             # permissions check
@@ -115,7 +120,7 @@ class CRUDUser(BaseCRUDRepository[User, UserCreate, UserUpdate]):
                     Permission.id.in_(permission_ids)).all()
                 if permissions:
                     for permission in permissions:
-                        if not permission in self.model.permissions:
+                        if not permission in User.permissions:
                             db_obj.permissions.append(permission)
 
             for field in obj_data:
@@ -228,7 +233,7 @@ class CRUDUser(BaseCRUDRepository[User, UserCreate, UserUpdate]):
         """Checks if a user has a specific permission directly or through roles."""
 
         user = await self.get_by_id(db, id=user_id)
-        return (permission_name in [p.title for p in self.model.permissions] or
+        return (permission_name in [p.title for p in User.permissions] or
                 any(permission_name in [p.title for p in role.permissions] for role in user.roles))
 
     async def get_all_roles(self, db: Session, user_id: UUID4):
@@ -239,8 +244,56 @@ class CRUDUser(BaseCRUDRepository[User, UserCreate, UserUpdate]):
         """Checks if a user has a specific role directly or through roles."""
 
         user = await self.get_by_id(db, id=user_id)
-        return (role_name in [r.title for r in self.model.roles] or
+        return (role_name in [r.title for r in User.roles] or
                 any(role_name in [r.title for r in role.roles] for role in user.roles))
+
+    async def get_all(
+            self, *,
+            db: Session,
+            skip: int = 0,
+            limit: int = 100,
+            order_by: Optional[str] = None,
+            order_direction: Literal['asc', 'desc'] = 'asc',
+            time_range_min: datetime = None,
+            time_range_max: datetime = None,
+            is_deleted: bool = None,
+            is_suspended: bool = None,
+            search: str = None,
+    ) -> List[User]:
+        query = db.query(User)
+        try:
+            if search: query = query.filter(or_(
+                User.first_name.ilike(f'%{search}%'),
+                User.last_name.ilike(f'%{search}%'),
+                User.username.ilike(f'%{search}%'),
+            ))
+            if is_deleted is not None: query = query.filter(User.deleted_at.isnot(None) == is_deleted)
+            if is_suspended is not None: query = query.filter(User.is_active != is_suspended)
+
+            if time_range_min: query = query.filter(User.created_at >= time_range_min)
+            if time_range_max: query = query.filter(User.created_at <= time_range_max)
+
+            if order_by:
+                try:
+                    order_column = getattr(User, order_by)
+                except AttributeError:
+                    raise ValueError(f'Invalid key given to order_by: {order_by}')
+                query = query.order_by(
+                    order_column.desc() if order_direction == 'desc' else order_column.asc()
+                )
+            else:
+                query = query.order_by(desc(User.created_at))
+
+            results = query.offset(skip).limit(limit).all()
+            return results
+        except HTTPException:
+            raise
+        except SQLAlchemyError:
+            log.error(f"Database error in get_all for {User.__name__}", exc_info=True)
+            return []
+        except:
+            log.exception(f"Unexpected error in get_all {User.__name__}")
+            raise await http_500_exc_internal_server_error()
 
 
 user_actions = CRUDUser(User)

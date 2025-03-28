@@ -9,7 +9,7 @@ from domains.auth.oauth.get_current_user import get_current_user
 from domains.auth.schemas.user import ChangePasswordSchema
 from domains.auth.services.user import user_service
 
-change_password_router = APIRouter()
+change_password_router = APIRouter(prefix='/users')
 
 
 @change_password_router.post(
@@ -21,4 +21,5 @@ async def change_password(
         current_user: User = Depends(get_current_user),
         passwords_in: ChangePasswordSchema
 ) -> None:
-    return await user_service.change_password(db=db, user=current_user, passwords_in=passwords_in)
+    user_id = passwords_in.user_id or current_user.id
+    return await user_service.change_password(db=db, user_id=user_id, passwords_in=passwords_in)

@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any, List, Literal
 
 from fastapi import APIRouter, Depends, status
@@ -28,9 +29,16 @@ async def list_users(
         order_by: str = None,
         order_direction: Literal['asc', 'desc'] = 'asc',
         is_deleted: bool = False,
+        is_suspended: bool = False,
+        time_range_min: datetime = None,
+        time_range_max: datetime = None,
+        search: str = None,
 ) -> Any:
     users = await actions.list_users(
-        db=db, skip=skip, limit=limit, order_by=order_by, order_direction=order_direction, is_deleted=is_deleted,
+        db=db, skip=skip, limit=limit, search=search,
+        order_by=order_by, order_direction=order_direction,
+        is_deleted=is_deleted, is_suspended=is_suspended,
+        time_range_min=time_range_min, time_range_max=time_range_max,
     )
     return users
 
@@ -80,6 +88,7 @@ async def get_user(
 
 @user_router.delete(
     "/{id}",
+    name="suspend_account",
     status_code=status.HTTP_204_NO_CONTENT,
     responses={status.HTTP_404_NOT_FOUND: {"model": HTTPError}},
 )

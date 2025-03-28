@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Any, Optional, Literal
 
 from fastapi import HTTPException, status
@@ -18,7 +19,17 @@ class UserService:
     def __init__(self):
         self.repo = user_repo
 
-    async def change_password(self, db: Session, user: User, passwords_in: ChangePasswordSchema):
+    async def activate_user(self, db: Session, id: int) -> Optional[User]:
+        user = await self.repo.get_by_id(db=db, id=id)
+        payload = dict(
+            is_active=True,
+            deleted_at=None
+        )
+        return await self.repo.update(db=db, db_obj=user, data=payload)
+
+    async def change_password(self, db: Session, user_id: User, passwords_in: ChangePasswordSchema):
+        user = await self.repo.get_by_id(db=db, id=user_id)
+
         old_password = passwords_in.old_password.strip()
         new_password = passwords_in.new_password.strip()
 
@@ -41,11 +52,17 @@ class UserService:
             limit: int = 100,
             order_by: str = None,
             order_direction: Literal['asc', 'desc'] = 'asc',
+            search: str = None,
             is_deleted: bool = False,
+            is_suspended: bool = False,
+            time_range_min: datetime = None,
+            time_range_max: datetime = None,
     ) -> List[UserSchema]:
         users = await self.repo.get_all(
-            db=db, skip=skip, limit=limit, order_by=order_by, order_direction=order_direction,
-            is_deleted=is_deleted,
+            db=db, skip=skip, limit=limit, search=search,
+            order_by=order_by, order_direction=order_direction,
+            is_deleted=is_deleted, is_suspended=is_suspended,
+            time_range_min=time_range_min, time_range_max=time_range_max,
         )
         return users
 

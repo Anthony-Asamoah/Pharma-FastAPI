@@ -180,10 +180,7 @@ class BaseCRUDRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType])
                 try:
                     order_column = getattr(self.model, order_by)
                 except AttributeError:
-                    raise HTTPException(
-                        status_code=HTTP_400_BAD_REQUEST,
-                        detail=f'Invalid key given to order_by: {order_by}'
-                    )
+                    raise ValueError(detail=f'Invalid key given to order_by: {order_by}')
                 query = query.order_by(
                     order_column.desc() if order_direction == 'desc' else order_column.asc()
                 )
@@ -235,10 +232,7 @@ class BaseCRUDRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType])
                 try:
                     order_column = getattr(self.model, order_by)
                 except AttributeError:
-                    raise HTTPException(
-                        status_code=HTTP_400_BAD_REQUEST,
-                        detail=f'Invalid key given to order_by: {order_by}'
-                    )
+                    raise ValueError(detail=f'Invalid key given to order_by: {order_by}')
                 query = query.order_by(
                     order_column.desc() if order_direction == 'desc' else order_column.asc()
                 )
@@ -250,10 +244,7 @@ class BaseCRUDRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType])
             raise
         except AttributeError as e:
             log.error(f"Invalid filter field", )
-            raise HTTPException(
-                status_code=HTTP_400_BAD_REQUEST,
-                detail=f'Invalid filter field provided for {self.model.__name__}'
-            )
+            raise ValueError(detail=f'Invalid filter field provided for {self.model.__name__}')
         except:
             log.exception(f"Error in get_by_filters for {self.model.__name__}")
             raise await http_500_exc_internal_server_error()
@@ -302,10 +293,7 @@ class BaseCRUDRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType])
                 try:
                     order_column = getattr(self.model, order_by)
                 except AttributeError:
-                    raise HTTPException(
-                        status_code=HTTP_400_BAD_REQUEST,
-                        detail=f'Invalid key given to order_by: {order_by}'
-                    )
+                    raise ValueError(detail=f'Invalid key given to order_by: {order_by}')
                 query = query.order_by(
                     order_column.desc() if order_direction == 'desc' else order_column.asc()
                 )

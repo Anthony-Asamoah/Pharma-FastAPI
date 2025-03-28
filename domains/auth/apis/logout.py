@@ -11,5 +11,8 @@ logout_router = APIRouter()
 
 
 @logout_router.get("/logout", status_code=status.HTTP_200_OK)
-async def logout(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+async def logout(
+        db: Session = Depends(get_db),
+        user: User = Depends(get_current_user),
+):
     return await user_service.logout(db=db, user=user)
