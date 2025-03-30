@@ -14,6 +14,7 @@ from domains.auth.schemas.revoked_token import RevokedTokenCreate
 from domains.auth.schemas.role import RoleSchema
 from domains.auth.schemas.user import UserSchema, UserUpdate, UserCreate, ChangePasswordSchema
 from domains.auth.services.revoked_token import revoked_token_service
+from domains.auth.services.role import role_service
 
 
 class UserService:
@@ -70,6 +71,9 @@ class UserService:
 
     async def create_user(self, db: Session, *, data: UserCreate) -> UserSchema:
         user = await self.repo.create(db=db, data=data)
+        # assign default roles
+        roles = await role_service.get_role_by_keywords(db=db,  default=True, is_deleted=None)
+        await self.add_roles(db=db, user_id=user.id, role_ids=[role.id for role in roles])
         return user
 
     async def update_user(self, db: Session, *, id: UUID4, data: UserUpdate) -> UserSchema:
