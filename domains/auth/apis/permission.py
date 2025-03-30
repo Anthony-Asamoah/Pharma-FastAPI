@@ -19,7 +19,7 @@ allowed_roles = ['SuperAdmin', 'Admin']
 @permission_router.get(
     "",
     response_model=List[schemas.PermissionSchema],
-    dependencies=[Depends(check_user_role(allowed_roles))],
+    dependencies=[Depends(check_user_role([*allowed_roles, 'Manager']))],
 )
 async def list_permissions(
         *, db: Session = Depends(get_db),

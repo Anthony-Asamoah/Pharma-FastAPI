@@ -13,13 +13,13 @@ from domains.auth.schemas import role as schemas
 from domains.auth.services.role import role_service as actions
 
 role_router = APIRouter(prefix="/roles")
-allowed_roles = ['SuperAdmin', 'Admin', 'Manager']
+allowed_roles = ['SuperAdmin', 'Admin']
 
 
 @role_router.get(
     "",
     response_model=List[schemas.RoleSchema],
-    dependencies=[Depends(check_user_role(allowed_roles))],
+    dependencies=[Depends(check_user_role([*allowed_roles, 'Manager']))],
 )
 async def list_roles(
         *, db: Session = Depends(get_db),

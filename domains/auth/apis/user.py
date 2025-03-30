@@ -16,7 +16,7 @@ from domains.auth.schemas.role import RoleSchema
 from domains.auth.services.user import user_service as actions
 
 user_router = APIRouter(prefix="/users")
-allowed_roles = ['SuperAdmin', 'Manager']
+allowed_roles = ['SuperAdmin', 'Admin', 'Manager']
 
 
 @user_router.get(
