@@ -1,6 +1,8 @@
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel
+
+from domains.shop.schemas.stock import VanillaStockSchema
 
 
 class TotalStockValueAndDailySaleSchema(BaseModel):
@@ -20,3 +22,12 @@ class SaleSummarySchema(BaseModel):
 class ExpensesSummarySchema(BaseModel):
     monthly_net: Optional[float] = 0.00
     daily_net: Optional[float] = 0.00
+
+
+class StockSummarySchema(BaseModel):
+    most_issued: List[VanillaStockSchema]
+    most_profitable: List[VanillaStockSchema]
+    most_refunded: List[VanillaStockSchema]
+    soon_expiring: List[VanillaStockSchema]
+    gross_stock_value: float
+    raw_expected_return: Optional[float]

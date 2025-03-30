@@ -1,5 +1,3 @@
-from uuid import uuid4
-
 import pendulum
 from sqlalchemy import (
     Column, Integer, Date, String, Float, Text, UUID, ForeignKey

@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Literal
+from typing import Literal, Optional, List
 
 from fastapi import HTTPException
 from pydantic import UUID4
@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from config.logger import log
 from crud.base_repository import BaseCRUDRepository
+from domains.shop.models import Sale
 from domains.shop.models.stock import Stock
 from domains.shop.schemas.stock import (
     StockCreateInternal, StockUpdateInternal
@@ -18,15 +19,98 @@ from utils.exceptions.exc_500 import http_500_exc_internal_server_error
 
 class CRUDStock(BaseCRUDRepository[Stock, StockCreateInternal, StockUpdateInternal]):
 
-    async def get_total_purchase_price(
+    async def list_most_issued_stock(
+            self, db: Session, *,
+            skip: int = 0,
+            limit: int = 5,
+            time_range_min: Optional[datetime],
+            time_range_max: Optional[datetime],
+    ) -> List[Stock]:
+        query = (
+            db.query(Stock, func.count(Sale.id).label('sales_count'))
+            .join(Sale, Stock.id == Sale.item_id)
+            .filter(Stock.deleted_at.is_(None))
+            .group_by(Stock.id)
+        )
+        if time_range_min: query = query.filter(Sale.created_at >= time_range_min)
+        if time_range_max: query = query.filter(Sale.created_at <= time_range_max)
+
+        query = query.order_by(desc('sales_count')).offset(skip).limit(limit).all()
+        results = [item[0] for item in query]
+        return results
+
+    async def list_most_profitable_stock(
+            self, db: Session, *,
+            skip: int = 0,
+            limit: int = 5,
+            time_range_min: Optional[datetime],
+            time_range_max: Optional[datetime],
+    ) -> List[Stock]:
+        query = (
+            db.query(Stock, func.sum(Sale.cost).label('total_profit'))
+            .join(Sale, Stock.id == Sale.item_id)
+            .filter(Stock.deleted_at.is_(None))
+            .group_by(Stock.id)
+        )
+        if time_range_min: query = query.filter(Sale.created_at >= time_range_min)
+        if time_range_max: query = query.filter(Sale.created_at <= time_range_max)
+
+        query = query.order_by(desc('total_profit')).offset(skip).limit(limit).all()
+        results = [item[0] for item in query]
+        return results
+
+    async def list_most_refunded_stock(
+            self, db: Session, *,
+            skip: int = 0,
+            limit: int = 5,
+            time_range_min: Optional[datetime],
+            time_range_max: Optional[datetime],
+    ) -> List[Stock]:
+        query = (
+            db.query(Stock, func.sum(Sale.quantity).label('total_refunded'))
+            .join(Sale, Stock.id == Sale.item_id)
+            .filter(Stock.deleted_at.is_(None))
+            .filter(Sale.deleted_at.isnot(None))  # Only include refunded sales
+            .group_by(Stock.id)
+        )
+        if time_range_min: query = query.filter(Sale.deleted_at >= time_range_min)
+        if time_range_max: query = query.filter(Sale.deleted_at <= time_range_max)
+
+        query = query.order_by(desc('total_refunded')).offset(skip).limit(limit).all()
+
+        results = [item[0] for item in query]
+        return results
+
+    async def list_soon_expiring_stock(
+            self, db: Session, *,
+            skip: int = 0,
+            limit: int = 5,
+            time_range_min: Optional[datetime],
+            time_range_max: Optional[datetime],
+    ) -> List[Stock]:
+        query = db.query(Stock).order_by(desc(Stock.expiry_date))
+        if time_range_min: query = query.filter(Stock.expiry_date >= time_range_min)
+        if time_range_max: query = query.filter(Stock.expiry_date <= time_range_max)
+        results = query.offset(skip).limit(limit).all()
+        return results
+
+    async def get_total_stock_value(
             self, db: Session,
             time_range_min: datetime = None,
             time_range_max: datetime = None
     ) -> float:
-        query = (db.query(func.sum(Stock.purchase_price))
+        query = (db.query(func.sum(Stock.purchase_price * Stock.quantity))
                  .filter(Stock.deleted_at.is_(None)))
-        if time_range_min: query = query.filter(time_range_min >= Stock.created_at)
-        if time_range_max: query = query.filter(time_range_max <= Stock.created_at)
+        if time_range_min: query = query.filter(Stock.created_at >= time_range_min)  # Fixed comparison direction
+        if time_range_max: query = query.filter(Stock.created_at <= time_range_max)  # Fixed comparison direction
+        result = query.scalar() or 0.00
+        return round(result, 2)
+
+    async def get_expected_return_amount(self, db: Session) -> float:
+        query = (
+            db.query(func.sum(Stock.selling_price * Stock.quantity))
+            .filter(Stock.deleted_at.is_(None))
+        )
         result = query.scalar() or 0.00
         return round(result, 2)
 

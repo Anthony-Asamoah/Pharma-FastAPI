@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from typing import List, Optional, Literal
 from uuid import uuid4
 
@@ -7,7 +7,7 @@ from pydantic import UUID4
 from sqlalchemy.orm import Session
 
 from domains.shop.repositories.stock import stock_actions as stock_repo
-from domains.shop.schemas.dashboard import TotalStockValueAndDailySaleSchema
+from domains.shop.schemas.dashboard import TotalStockValueAndDailySaleSchema, StockSummarySchema
 from domains.shop.schemas.stock import StockSchema, StockUpdate, StockCreate, StockUpdateInternal, VanillaStockSchema
 
 
@@ -104,7 +104,7 @@ class StockService:
         )
         return stocks
 
-    async def assemble_dash(
+    async def get_total_stock_value_and_daily_sale(
             self, db: Session
     ) -> TotalStockValueAndDailySaleSchema:
         from domains.shop.services.sale import sale_service
@@ -114,11 +114,38 @@ class StockService:
         time_range_max = pendulum.tomorrow()
 
         return TotalStockValueAndDailySaleSchema(
-            total_purchase_price=await self.repo.get_total_purchase_price(db=db),
+            total_purchase_price=await self.repo.get_total_stock_value(db=db),
             total_sell_price=await sale_service.repo.get_sales_amount_for_date_range(
                 db=db, time_range_min=time_range_min, time_range_max=time_range_max
             ),
         )
+
+    async def assemble_summary(
+            self, db: Session, *,
+            skip: int = 0,
+            limit: int = 5,
+            time_range_min: Optional[datetime] = None,
+            time_range_max: Optional[datetime] = None,
+    ) -> StockSummarySchema:
+        payload = dict(
+            most_issued=await self.repo.list_most_issued_stock(
+                db=db, skip=skip, limit=limit, time_range_min=time_range_min, time_range_max=time_range_max
+            ),
+            most_profitable=await self.repo.list_most_profitable_stock(
+                db=db, skip=skip, limit=limit, time_range_min=time_range_min, time_range_max=time_range_max
+            ),
+            most_refunded=await self.repo.list_most_refunded_stock(
+                db=db, skip=skip, limit=limit, time_range_min=time_range_min, time_range_max=time_range_max
+            ),
+            soon_expiring=await self.repo.list_soon_expiring_stock(
+                db=db, skip=skip, limit=limit, time_range_min=time_range_min, time_range_max=time_range_max
+            ),
+            gross_stock_value=await self.repo.get_total_stock_value(
+                db=db, time_range_min=time_range_min, time_range_max=time_range_max
+            ),
+            raw_expected_return=await self.repo.get_expected_return_amount(db=db),
+        )
+        return StockSummarySchema(**payload)
 
 
 stock_service = StockService()
