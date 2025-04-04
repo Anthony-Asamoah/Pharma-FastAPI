@@ -7,8 +7,8 @@ from sqlalchemy.orm import Session
 from crud.base_schema import HTTPError
 from db.session import get_db
 from domains.auth.models import User
-from domains.auth.oauth import get_current_user
-from domains.auth.rbac import check_user_role
+from domains.auth.utils import get_current_user
+from domains.auth.utils.rbac import check_user_role
 from domains.auth.schemas import permission as schemas
 from domains.auth.services.permission import permission_service as actions
 

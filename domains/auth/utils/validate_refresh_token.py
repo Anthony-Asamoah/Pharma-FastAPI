@@ -7,7 +7,7 @@ from starlette import status
 
 from config.settings import settings
 from db.session import get_db
-from domains.auth.oauth.get_current_user import oauth2_scheme
+from domains.auth.utils.get_current_user import oauth2_scheme
 from domains.auth.services.user import user_service
 
 

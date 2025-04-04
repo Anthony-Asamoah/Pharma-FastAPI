@@ -4,7 +4,7 @@ from starlette import status
 
 from db.session import get_db
 from domains.auth.models import User
-from domains.auth.oauth import get_current_user
+from domains.auth.utils import get_current_user
 from domains.auth.services.user import user_service
 
 logout_router = APIRouter()

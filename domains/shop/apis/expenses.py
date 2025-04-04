@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from crud.base_schema import HTTPError
 from db.session import get_db
 from domains.auth.models import User
-from domains.auth.oauth import get_current_user
+from domains.auth.utils import get_current_user
 from domains.shop.schemas import expenses as schemas
 from domains.shop.services.expenses import expenses_service as actions
 

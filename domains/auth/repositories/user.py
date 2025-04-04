@@ -24,12 +24,12 @@ from utils.exceptions.exc_500 import http_500_exc_internal_server_error
 class Hasher:
     @staticmethod
     def verify_password(plain_password, hashed_password):
-        from domains.auth.oauth.authenticate_user import pwd_context
+        from domains.auth.utils.authenticate_user import pwd_context
         return pwd_context.verify(plain_password, hashed_password)
 
     @staticmethod
     def get_password_hash(password):
-        from domains.auth.oauth.authenticate_user import pwd_context
+        from domains.auth.utils.authenticate_user import pwd_context
         return pwd_context.hash(password)
 
 

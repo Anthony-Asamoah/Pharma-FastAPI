@@ -7,8 +7,8 @@ from starlette import status
 
 from config.settings import settings
 from db.session import get_db
-from domains.auth.oauth.create_token import create_access_token, create_refresh_token
-from domains.auth.oauth.validate_refresh_token import validate_refresh_token
+from domains.auth.utils.create_token import create_access_token, create_refresh_token
+from domains.auth.utils.validate_refresh_token import validate_refresh_token
 
 refresh_token_router = APIRouter()
 

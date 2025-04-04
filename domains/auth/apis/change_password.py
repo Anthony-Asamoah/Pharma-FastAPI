@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from db.session import get_db
 from domains.auth.models.user import User
-from domains.auth.oauth.get_current_user import get_current_user
+from domains.auth.utils.get_current_user import get_current_user
 from domains.auth.schemas.user import ChangePasswordSchema
 from domains.auth.services.user import user_service
 

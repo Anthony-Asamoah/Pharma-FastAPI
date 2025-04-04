@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from config.logger import log
 from domains.auth.models import User
-from domains.auth.oauth.authenticate_user import pwd_context
+from domains.auth.utils.authenticate_user import pwd_context
 from domains.auth.repositories.user import user_actions as user_repo
 from domains.auth.schemas.permission import PermissionSchema
 from domains.auth.schemas.revoked_token import RevokedTokenCreate

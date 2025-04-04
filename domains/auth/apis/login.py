@@ -7,8 +7,8 @@ from sqlalchemy.orm import Session
 
 from config.settings import settings
 from db.session import get_db
-from domains.auth.oauth.authenticate_user import authenticate_user
-from domains.auth.oauth.create_token import create_refresh_token, create_access_token
+from domains.auth.utils.authenticate_user import authenticate_user
+from domains.auth.utils.create_token import create_refresh_token, create_access_token
 from domains.auth.schemas.token import Token
 
 login_router = APIRouter()

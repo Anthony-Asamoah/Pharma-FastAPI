@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from db.session import get_db
 from domains.auth.models import User
-from domains.auth.oauth import get_current_user
+from domains.auth.utils import get_current_user
 from domains.shop.schemas.dashboard import TotalStockValueAndDailySaleSchema, SaleSummarySchema, StockSummarySchema
 from domains.shop.services.expenses import expenses_service
 from domains.shop.services.sale import sale_service

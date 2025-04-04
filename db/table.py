@@ -11,6 +11,8 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import as_declarative
 from sqlalchemy.orm import DeclarativeBase, declared_attr
 
+from utils.query_check import File
+
 
 class DBTable(DeclarativeBase):
     metadata: sqlalchemy.MetaData = sqlalchemy.MetaData()  # type: ignore
@@ -37,7 +39,16 @@ class Base:
         return p.plural(camel_check.lower())
 
 
-class BaseModel(Base):
+class BaseMethodMixin(object):
+    @classmethod
+    def c(cls):
+        return [
+            (c.name, c.type.python_type) if not isinstance(c.type, File) else (c.name, str) for c in
+            cls.__table__.columns
+        ]
+
+
+class BaseModel(BaseMethodMixin, Base):
     __abstract__ = True
     id = Column(UUID(as_uuid=True), default=uuid4, primary_key=True)
     created_at = Column(
