@@ -1,7 +1,14 @@
 """
-The HTTP 500 Internal Server Error response status code indicates that the server encountered
-an unexpected condition that prevented it from fulfilling the request.
+Raises an HTTPException with status code 500 (Internal Server Error).
+
+Indicates that the server encountered an unexpected condition that prevented
+it from fulfilling the request. This is typically used for unhandled exceptions
+or unknown server-side issues.
+
+Returns:
+    HTTPException: FastAPI exception with status code 500 and a generic error message.
 """
+
 from fastapi import HTTPException, status
 
 
