@@ -27,9 +27,10 @@ async def list_roles(
         skip: int = 0,
         limit: int = 100,
         order_by: Optional[List[str]] = None,
+        search: str = None,
 ) -> Any:
     roles = await actions.list_roles(
-        db=db, skip=skip, limit=limit, order_by=order_by
+        db=db, skip=skip, limit=limit, order_by=order_by, search=search
     )
     return roles
 

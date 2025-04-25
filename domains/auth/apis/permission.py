@@ -27,9 +27,10 @@ async def list_permissions(
         skip: int = 0,
         limit: int = 100,
         order_by: Optional[List[str]] = None,
+        search: str = None,
 ) -> Any:
     permissions = await actions.list_permissions(
-        db=db, skip=skip, limit=limit, order_by=order_by
+        db=db, skip=skip, limit=limit, order_by=order_by, search=search
     )
     return permissions
 

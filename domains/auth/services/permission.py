@@ -23,9 +23,10 @@ class PermissionService:
             skip: int = 0,
             limit: int = 100,
             order_by: Optional[List[str]] = None,
+            search: str = None,
     ) -> List[PermissionSchema]:
-        permissions = await self.repo.get_all(
-            db=db, skip=skip, limit=limit, order_by=order_by
+        permissions = await self.repo.get_by_pattern(
+            db=db, skip=skip, limit=limit, order_by=order_by, title=search
         )
         return permissions
 
