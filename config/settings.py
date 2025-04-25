@@ -135,7 +135,7 @@ class FactoryAppSettings:
 
 @lru_cache()
 def get_settings() -> AppSettings:
-    return FactoryAppSettings(environment="APP_ENV")()
+    return FactoryAppSettings(environment="development")()
 
 
 settings = get_settings()
