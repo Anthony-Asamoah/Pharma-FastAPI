@@ -1,5 +1,6 @@
+import asyncio
+
 from db.session import SessionLocal
-from domains.auth.repositories.user import user_actions
 from domains.auth.schemas.role import RoleCreate
 from domains.auth.schemas.user import UserCreate
 from domains.auth.services.user import user_service
@@ -38,3 +39,7 @@ async def create_system_admin():
 
         # assign role
         await user_service.add_roles(db=db, user_id=system_admin.id, role_ids=[system_admin_role.id])
+
+
+if __name__ == "__main__":
+    asyncio.run(create_system_admin())

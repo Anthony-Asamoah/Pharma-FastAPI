@@ -42,4 +42,5 @@ def _get_app_models() -> list[str]:
 
 
 if __name__ == '__main__':
+    create_roles()
     create_permissions()
