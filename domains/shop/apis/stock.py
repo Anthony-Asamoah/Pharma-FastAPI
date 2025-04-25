@@ -1,5 +1,7 @@
-from typing import Any, List
+from datetime import date
+from typing import Any, List, Optional
 
+import pendulum
 from fastapi import APIRouter, Depends, status
 from pydantic import UUID4
 from sqlalchemy.orm import Session
@@ -9,10 +11,8 @@ from db.session import get_db
 from domains.auth.models import User
 from domains.auth.utils import get_current_user
 from domains.auth.utils.rbac import check_user_role
-from domains.shop.models import Stock
 from domains.shop.schemas import stock as schemas
 from domains.shop.services.stock import stock_service as actions
-from utils.query_check import ContentQueryChecker
 
 stock_router = APIRouter(prefix="/stock")
 allowed_roles = ["SuperAdmin", "Admin", "Manager", "Supervisor"]
@@ -23,28 +23,33 @@ allowed_roles = ["SuperAdmin", "Admin", "Manager", "Supervisor"]
     description="Get a list of available stock in alphabetical order",
     response_model=List[schemas.VanillaStockSchema],
 )
-@ContentQueryChecker(Stock.c(), None)
+# @ContentQueryChecker(Stock.c(), None)
 async def list_stocks(
         *, db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user),
-        # skip: int = 0,
-        # limit: int = 100,
-        # order_by: str = "name",
-        # order_direction: Literal['asc', 'desc'] = 'asc',
-        # search: str = None,
-        # quantity_min: int = 1,
-        # quantity_max: int = None,
-        # expiry_date_min: date = pendulum.now().date(),
-        # expiry_date_max: date = None,
-        # selling_price_min: float = None,
-        # selling_price_max: float = None,
+        skip: int = 0,
+        limit: int = 100,
+        order_by: Optional[List[str]] = None,
+        search: str = None,
+        quantity_min: int = 1,
+        quantity_max: int = None,
+        expiry_date_min: date = pendulum.now().date(),
+        expiry_date_max: date = None,
+        selling_price_min: float = None,
+        selling_price_max: float = None,
 ) -> Any:
     stocks = await actions.list_stocks(
-        # db=db, skip=skip, limit=limit, search=search,
-        # order_by=order_by, order_direction=order_direction,
-        # quantity_min=quantity_min, quantity_max=quantity_max,
-        # expiry_date_min=expiry_date_min, expiry_date_max=expiry_date_max,
-        # selling_price_min=selling_price_min, selling_price_max=selling_price_max,
+        db=db,
+        skip=skip,
+        limit=limit,
+        search=search,
+        order_by=order_by,
+        quantity_min=quantity_min,
+        quantity_max=quantity_max,
+        expiry_date_min=expiry_date_min,
+        expiry_date_max=expiry_date_max,
+        selling_price_min=selling_price_min,
+        selling_price_max=selling_price_max,
     )
     return stocks
 

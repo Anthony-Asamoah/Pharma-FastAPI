@@ -1,4 +1,4 @@
-from typing import List, Optional, Literal
+from typing import List, Optional
 
 from pydantic import UUID4
 from sqlalchemy.orm import Session
@@ -22,11 +22,10 @@ class PermissionService:
             self, db: Session, *,
             skip: int = 0,
             limit: int = 100,
-            order_by: str = None,
-            order_direction: Literal['asc', 'desc'] = 'asc'
+            order_by: Optional[List[str]] = None,
     ) -> List[PermissionSchema]:
         permissions = await self.repo.get_all(
-            db=db, skip=skip, limit=limit, order_by=order_by, order_direction=order_direction
+            db=db, skip=skip, limit=limit, order_by=order_by
         )
         return permissions
 
@@ -50,12 +49,11 @@ class PermissionService:
             self, db: Session, *,
             skip: int = 0,
             limit: int = 100,
-            order_by: Optional[str] = None,
-            order_direction: Literal['asc', 'desc'] = 'asc',
+            order_by: Optional[List[str]] = None,
             **kwargs
     ) -> List[PermissionSchema]:
         permissions = await self.repo.get_by_filters(
-            db=db, skip=skip, limit=limit, order_by=order_by, order_direction=order_direction, **kwargs
+            db=db, skip=skip, limit=limit, order_by=order_by, **kwargs
         )
         return permissions
 
@@ -63,12 +61,11 @@ class PermissionService:
             self, db: Session, *,
             skip: int = 0,
             limit: int = 100,
-            order_by: Optional[str] = None,
-            order_direction: Literal['asc', 'desc'] = 'asc',
+            order_by: Optional[List[str]] = None,
             **kwargs
     ) -> List[PermissionSchema]:
         permissions = await self.repo.get_by_pattern(
-            db=db, skip=skip, limit=limit, order_by=order_by, order_direction=order_direction, **kwargs
+            db=db, skip=skip, limit=limit, order_by=order_by, **kwargs
         )
         return permissions
 

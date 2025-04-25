@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional, Literal
+from typing import List, Optional
 
 import pendulum
 from pydantic import UUID4
@@ -19,8 +19,7 @@ class ExpensesService:
             self, db: Session, *,
             skip: int = 0,
             limit: int = 100,
-            order_by: str = None,
-            order_direction: Literal['asc', 'desc'] = 'asc',
+            order_by: Optional[List[str]] = None,
             search: str = None,
             time_range_min: datetime = None,
             time_range_max: datetime = None,
@@ -29,10 +28,16 @@ class ExpensesService:
             is_deleted: bool = None,
     ) -> List[ExpensesSchema]:
         expense = await self.repo.get_all(
-            db=db, skip=skip, limit=limit, search=search, is_deleted=is_deleted,
-            order_by=order_by, order_direction=order_direction,
-            time_range_min=time_range_min, time_range_max=time_range_max,
-            price_range_min=price_range_min, price_range_max=price_range_max,
+            db=db,
+            skip=skip,
+            limit=limit,
+            search=search,
+            is_deleted=is_deleted,
+            order_by=order_by,
+            time_range_min=time_range_min,
+            time_range_max=time_range_max,
+            price_range_min=price_range_min,
+            price_range_max=price_range_max,
         )
         return expense
 
@@ -57,12 +62,11 @@ class ExpensesService:
             self, db: Session, *,
             skip: int = 0,
             limit: int = 100,
-            order_by: Optional[str] = None,
-            order_direction: Literal['asc', 'desc'] = 'asc',
+            order_by: Optional[List[str]] = None,
             **kwargs
     ) -> List[ExpensesSchema]:
         expense = await self.repo.get_by_filters(
-            db=db, skip=skip, limit=limit, order_by=order_by, order_direction=order_direction, **kwargs
+            db=db, skip=skip, limit=limit, order_by=order_by, **kwargs
         )
         return expense
 
@@ -70,12 +74,11 @@ class ExpensesService:
             self, db: Session, *,
             skip: int = 0,
             limit: int = 100,
-            order_by: Optional[str] = None,
-            order_direction: Literal['asc', 'desc'] = 'asc',
+            order_by: Optional[List[str]] = None,
             **kwargs
     ) -> List[ExpensesSchema]:
         expense = await self.repo.get_by_pattern(
-            db=db, skip=skip, limit=limit, order_by=order_by, order_direction=order_direction, **kwargs
+            db=db, skip=skip, limit=limit, order_by=order_by, **kwargs
         )
         return expense
 

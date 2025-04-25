@@ -1,8 +1,7 @@
 from datetime import datetime
-from typing import Literal, List
+from typing import List, Optional
 
-from fastapi import HTTPException, status
-from sqlalchemy import desc
+from fastapi import HTTPException
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
@@ -20,8 +19,7 @@ class CRUDReceipt(BaseCRUDRepository[Receipt, ReceiptCreateInternal, ReceiptUpda
             self, db: Session, *,
             skip: int = 0,
             limit: int = 100,
-            order_by: str = None,
-            order_direction: Literal['asc', 'desc'] = 'asc',
+            order_by: Optional[List[str]] = None,
             is_refunded: bool = None,
             payment_type: str = None,
             price_from: float = None,
@@ -40,21 +38,10 @@ class CRUDReceipt(BaseCRUDRepository[Receipt, ReceiptCreateInternal, ReceiptUpda
 
             if time_range_min: query = query.filter(Receipt.created_at >= time_range_min)
             if time_range_max: query = query.filter(Receipt.created_at <= time_range_max)
-            if order_by:
-                try:
-                    order_column = getattr(Receipt, order_by)
-                except AttributeError:
-                    raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail=f'Invalid key given to order_by: {order_by}'
-                    )
-                query = query.order_by(
-                    order_column.desc() if order_direction == 'desc' else order_column.asc()
-                )
-            else:
-                query = query.order_by(desc(Receipt.created_at))
 
+            query = await self._get_ordering(query=query, order_by=order_by)
             results = query.offset(skip).limit(limit).all()
+
             return results
         except HTTPException:
             raise

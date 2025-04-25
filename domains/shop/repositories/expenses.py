@@ -21,8 +21,7 @@ class CRUDExpenses(BaseCRUDRepository[Expenses, ExpensesCreate, ExpensesUpdate])
             db: Session,
             skip: int = 0,
             limit: int = 100,
-            order_by: Optional[str] = None,
-            order_direction: Literal['asc', 'desc'] = 'asc',
+            order_by: Optional[List[str]] = None,
             search: str = None,
             time_range_min: datetime = None,
             time_range_max: datetime = None,
@@ -41,21 +40,10 @@ class CRUDExpenses(BaseCRUDRepository[Expenses, ExpensesCreate, ExpensesUpdate])
 
             if time_range_min: query = query.filter(Expenses.paid_at >= time_range_min)
             if time_range_max: query = query.filter(Expenses.created_at <= time_range_max)
-            if order_by:
-                try:
-                    order_column = getattr(Expenses, order_by)
-                except AttributeError:
-                    raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail=f'Invalid key given to order_by: {order_by}'
-                    )
-                query = query.order_by(
-                    order_column.desc() if order_direction == 'desc' else order_column.asc()
-                )
-            else:
-                query = query.order_by(desc(Expenses.created_at))
 
+            query = await self._get_ordering(query=query, order_by=order_by)
             results = query.offset(skip).limit(limit).all()
+
             return results
         except HTTPException:
             raise

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, List, Literal
+from typing import Any, List, Literal, Optional
 
 from fastapi import APIRouter, Depends, status
 from pydantic import UUID4
@@ -24,8 +24,7 @@ async def list_expenses(
         current_user: User = Depends(get_current_user),
         skip: int = 0,
         limit: int = 100,
-        order_by: str = None,
-        order_direction: Literal['asc', 'desc'] = 'asc',
+        order_by: Optional[List[str]] = None,
         search: str = None,
         time_range_min: datetime = None,
         time_range_max: datetime = None,
@@ -34,10 +33,16 @@ async def list_expenses(
         is_deleted: bool = False,
 ) -> Any:
     expense = await actions.list_expenses(
-        db=db, skip=skip, limit=limit, search=search, is_deleted=is_deleted,
-        order_by=order_by, order_direction=order_direction,
-        time_range_min=time_range_min, time_range_max=time_range_max,
-        price_range_min=price_range_min, price_range_max=price_range_max,
+        db=db,
+        skip=skip,
+        limit=limit,
+        search=search,
+        is_deleted=is_deleted,
+        order_by=order_by,
+        time_range_min=time_range_min,
+        time_range_max=time_range_max,
+        price_range_min=price_range_min,
+        price_range_max=price_range_max,
     )
     return expense
 

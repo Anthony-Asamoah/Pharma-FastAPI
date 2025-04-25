@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, List, Literal
+from typing import Any, List, Optional
 
 from fastapi import APIRouter, Depends, status
 from pydantic import UUID4
@@ -24,8 +24,7 @@ async def list_receipts(
         current_user: User = Depends(get_current_user),
         skip: int = 0,
         limit: int = 100,
-        order_by: str = None,
-        order_direction: Literal['asc', 'desc'] = 'asc',
+        order_by: Optional[List[str]] = None,
         is_refunded: bool = False,
         payment_type: str = None,
         price_from: float = None,
@@ -34,11 +33,16 @@ async def list_receipts(
         time_range_max: datetime = None,
 ) -> Any:
     receipts = await actions.list_receipts(
-        db=db, skip=skip, limit=limit,
-        order_by=order_by, order_direction=order_direction,
-        time_range_min=time_range_min, time_range_max=time_range_max,
-        price_from=price_from, price_to=price_to,
-        is_refunded=is_refunded, payment_type=payment_type
+        db=db,
+        skip=skip,
+        limit=limit,
+        order_by=order_by,
+        time_range_min=time_range_min,
+        time_range_max=time_range_max,
+        price_from=price_from,
+        price_to=price_to,
+        is_refunded=is_refunded,
+        payment_type=payment_type
     )
     return receipts
 

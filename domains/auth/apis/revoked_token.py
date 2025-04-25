@@ -1,4 +1,4 @@
-from typing import Any, List, Literal
+from typing import Any, List, Optional
 
 from fastapi import APIRouter, Depends, status
 from pydantic import UUID4
@@ -7,10 +7,10 @@ from sqlalchemy.orm import Session
 from crud.base_schema import HTTPError
 from db.session import get_db
 from domains.auth.models import User
-from domains.auth.utils import get_current_user
-from domains.auth.utils.rbac import check_user_role
 from domains.auth.schemas import revoked_token as schemas
 from domains.auth.services.revoked_token import revoked_token_service as actions
+from domains.auth.utils import get_current_user
+from domains.auth.utils.rbac import check_user_role
 
 revoked_token_router = APIRouter(prefix="/revoked_tokens")
 allowed_roles = ["SuperAdmin", "Admin"]
@@ -26,11 +26,10 @@ async def list_revoked_tokens(
         current_user: User = Depends(get_current_user),
         skip: int = 0,
         limit: int = 100,
-        order_by: str = None,
-        order_direction: Literal['asc', 'desc'] = 'asc'
+        order_by: Optional[List[str]] = None,
 ) -> Any:
     revoked_tokens = await actions.list_revoked_tokens(
-        db=db, skip=skip, limit=limit, order_by=order_by, order_direction=order_direction
+        db=db, skip=skip, limit=limit, order_by=order_by
     )
     return revoked_tokens
 

@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import List, Optional, Literal
+from typing import List, Optional
 from uuid import uuid4
 
 import pendulum
@@ -25,14 +25,13 @@ class StockService:
         await self.update_stock(db=db, id=id, data=StockUpdate())
 
     async def get_by_reference(self, db: Session, *, ref: str, silent=False) -> Optional[StockSchema]:
-        return await self.repo.get_by_field(db=db, field="ref", value=ref, silent=silent)
+        return await self.repo.get_one(db=db, silent=silent, ref=ref)
 
     async def list_stocks(
             self, db: Session, *,
             skip: int = 0,
             limit: int = 100,
-            order_by: str = None,
-            order_direction: Literal['asc', 'desc'] = 'asc',
+            order_by: Optional[List[str]] = None,
             search: str = None,
             quantity_min: int = None,
             quantity_max: int = None,
@@ -42,11 +41,17 @@ class StockService:
             selling_price_max: float = None,
     ) -> List[VanillaStockSchema]:
         stocks = await self.repo.get_all(
-            db=db, skip=skip, limit=limit, search=search,
-            order_by=order_by, order_direction=order_direction,
-            quantity_min=quantity_min, quantity_max=quantity_max,
-            expiry_date_min=expiry_date_min, expiry_date_max=expiry_date_max,
-            selling_price_min=selling_price_min, selling_price_max=selling_price_max,
+            db=db,
+            skip=skip,
+            limit=limit,
+            search=search,
+            order_by=order_by,
+            quantity_min=quantity_min,
+            quantity_max=quantity_max,
+            expiry_date_min=expiry_date_min,
+            expiry_date_max=expiry_date_max,
+            selling_price_min=selling_price_min,
+            selling_price_max=selling_price_max,
         )
         return stocks
 
@@ -82,12 +87,11 @@ class StockService:
             self, db: Session, *,
             skip: int = 0,
             limit: int = 100,
-            order_by: Optional[str] = None,
-            order_direction: Literal['asc', 'desc'] = 'asc',
+            order_by: Optional[List[str]] = None,
             **kwargs
     ) -> List[StockSchema]:
         stocks = await self.repo.get_by_filters(
-            db=db, skip=skip, limit=limit, order_by=order_by, order_direction=order_direction, **kwargs
+            db=db, skip=skip, limit=limit, order_by=order_by, **kwargs
         )
         return stocks
 
@@ -95,12 +99,11 @@ class StockService:
             self, db: Session, *,
             skip: int = 0,
             limit: int = 100,
-            order_by: Optional[str] = None,
-            order_direction: Literal['asc', 'desc'] = 'asc',
+            order_by: Optional[List[str]] = None,
             **kwargs
     ) -> List[StockSchema]:
         stocks = await self.repo.get_by_pattern(
-            db=db, skip=skip, limit=limit, order_by=order_by, order_direction=order_direction, **kwargs
+            db=db, skip=skip, limit=limit, order_by=order_by, **kwargs
         )
         return stocks
 

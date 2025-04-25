@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Any, Optional, Literal
+from typing import List, Any, Optional
 
 from fastapi import HTTPException, status
 from pydantic import UUID4
@@ -53,8 +53,7 @@ class UserService:
             self, db: Session, *,
             skip: int = 0,
             limit: int = 100,
-            order_by: str = None,
-            order_direction: Literal['asc', 'desc'] = 'asc',
+            order_by: Optional[List[str]] = None,
             search: str = None,
             is_deleted: bool = False,
             is_suspended: bool = False,
@@ -62,10 +61,15 @@ class UserService:
             time_range_max: datetime = None,
     ) -> List[UserSchema]:
         users = await self.repo.get_all(
-            db=db, skip=skip, limit=limit, search=search,
-            order_by=order_by, order_direction=order_direction,
-            is_deleted=is_deleted, is_suspended=is_suspended,
-            time_range_min=time_range_min, time_range_max=time_range_max,
+            db=db,
+            skip=skip,
+            limit=limit,
+            search=search,
+            order_by=order_by,
+            is_deleted=is_deleted,
+            is_suspended=is_suspended,
+            time_range_min=time_range_min,
+            time_range_max=time_range_max,
         )
         return users
 
@@ -92,12 +96,11 @@ class UserService:
             self, db: Session, *,
             skip: int = 0,
             limit: int = 100,
-            order_by: Optional[str] = None,
-            order_direction: Literal['asc', 'desc'] = 'asc',
+            order_by: Optional[List[str]] = None,
             **kwargs
     ) -> List[UserSchema]:
         users = await self.repo.get_by_filters(
-            db=db, skip=skip, limit=limit, order_by=order_by, order_direction=order_direction, **kwargs
+            db=db, skip=skip, limit=limit, order_by=order_by, **kwargs
         )
         return users
 
@@ -105,12 +108,11 @@ class UserService:
             self, db: Session, *,
             skip: int = 0,
             limit: int = 100,
-            order_by: Optional[str] = None,
-            order_direction: Literal['asc', 'desc'] = 'asc',
+            order_by: Optional[List[str]] = None,
             **kwargs
     ) -> List[UserSchema]:
         users = await self.repo.get_by_pattern(
-            db=db, skip=skip, limit=limit, order_by=order_by, order_direction=order_direction, **kwargs
+            db=db, skip=skip, limit=limit, order_by=order_by, **kwargs
         )
         return users
 

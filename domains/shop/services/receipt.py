@@ -1,14 +1,18 @@
 import asyncio
 from datetime import datetime
-from typing import List, Optional, Literal
+from typing import List, Optional
 
 from pydantic import UUID4
 from sqlalchemy.orm import Session
 
-from config.settings import settings
 from domains.shop.repositories.receipt import receipt_actions as receipt_repo
-from domains.shop.schemas.receipt import ReceiptSchema, ReceiptUpdate, ReceiptCreateWithSales, ReceiptCreateInternal, \
+from domains.shop.schemas.receipt import (
+    ReceiptSchema,
+    ReceiptUpdate,
+    ReceiptCreateWithSales,
+    ReceiptCreateInternal,
     VanillaReceiptSchema
+)
 from domains.shop.schemas.sale import SaleCreate
 from domains.shop.services.sale import sale_service
 from domains.shop.services.stock import stock_service
@@ -23,8 +27,7 @@ class ReceiptService:
             self, db: Session, *,
             skip: int = 0,
             limit: int = 100,
-            order_by: str = None,
-            order_direction: Literal['asc', 'desc'] = 'asc',
+            order_by: Optional[List[str]] = None,
             is_refunded: bool = None,
             payment_type: str = None,
             price_from: float = None,
@@ -33,11 +36,16 @@ class ReceiptService:
             time_range_max: datetime = None,
     ) -> List[VanillaReceiptSchema]:
         receipts = await self.repo.get_all(
-            db=db, skip=skip, limit=limit,
-            order_by=order_by, order_direction=order_direction,
-            time_range_min=time_range_min, time_range_max=time_range_max,
-            price_from=price_from, price_to=price_to,
-            is_refunded=is_refunded, payment_type=payment_type
+            db=db,
+            skip=skip,
+            limit=limit,
+            order_by=order_by,
+            time_range_min=time_range_min,
+            time_range_max=time_range_max,
+            price_from=price_from,
+            price_to=price_to,
+            is_refunded=is_refunded,
+            payment_type=payment_type
         )
         return receipts
 
@@ -110,12 +118,11 @@ class ReceiptService:
             self, db: Session, *,
             skip: int = 0,
             limit: int = 100,
-            order_by: Optional[str] = None,
-            order_direction: Literal['asc', 'desc'] = 'asc',
+            order_by: Optional[List[str]] = None,
             **kwargs
     ) -> List[ReceiptSchema]:
         receipts = await self.repo.get_by_filters(
-            db=db, skip=skip, limit=limit, order_by=order_by, order_direction=order_direction, **kwargs
+            db=db, skip=skip, limit=limit, order_by=order_by, **kwargs
         )
         return receipts
 
@@ -123,12 +130,11 @@ class ReceiptService:
             self, db: Session, *,
             skip: int = 0,
             limit: int = 100,
-            order_by: Optional[str] = None,
-            order_direction: Literal['asc', 'desc'] = 'asc',
+            order_by: Optional[List[str]] = None,
             **kwargs
     ) -> List[ReceiptSchema]:
         receipts = await self.repo.get_by_pattern(
-            db=db, skip=skip, limit=limit, order_by=order_by, order_direction=order_direction, **kwargs
+            db=db, skip=skip, limit=limit, order_by=order_by, **kwargs
         )
         return receipts
 

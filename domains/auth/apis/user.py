@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, List, Literal
+from typing import Any, List, Optional
 
 from fastapi import APIRouter, Depends, status
 from pydantic import UUID4
@@ -8,12 +8,12 @@ from sqlalchemy.orm import Session
 from crud.base_schema import HTTPError
 from db.session import get_db
 from domains.auth.models import User
-from domains.auth.utils import get_current_user
-from domains.auth.utils.rbac import check_user_role
 from domains.auth.schemas import user as schemas
 from domains.auth.schemas.permission import PermissionSchema
 from domains.auth.schemas.role import RoleSchema
 from domains.auth.services.user import user_service as actions
+from domains.auth.utils import get_current_user
+from domains.auth.utils.rbac import check_user_role
 
 user_router = APIRouter(prefix="/users")
 allowed_roles = ['SuperAdmin', 'Admin', 'Manager']
@@ -29,8 +29,7 @@ async def list_users(
         current_user: User = Depends(get_current_user),
         skip: int = 0,
         limit: int = 100,
-        order_by: str = None,
-        order_direction: Literal['asc', 'desc'] = 'asc',
+        order_by: Optional[List[str]] = None,
         is_deleted: bool = False,
         is_suspended: bool = False,
         time_range_min: datetime = None,
@@ -39,7 +38,7 @@ async def list_users(
 ) -> Any:
     users = await actions.list_users(
         db=db, skip=skip, limit=limit, search=search,
-        order_by=order_by, order_direction=order_direction,
+        order_by=order_by,
         is_deleted=is_deleted, is_suspended=is_suspended,
         time_range_min=time_range_min, time_range_max=time_range_max,
     )

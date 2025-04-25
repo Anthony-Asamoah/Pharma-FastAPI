@@ -35,7 +35,7 @@ class Hasher:
 
 class CRUDUser(BaseCRUDRepository[User, UserCreate, UserUpdate]):
     async def get_user_by_username(self, db: Session, username: str, silent=True) -> User | bool:
-        user = await self.get_by_field(db=db, field="username", value=username, silent=silent)
+        user = await self.get_one(db=db, silent=silent, username=username)
         if not user: return False
         return user
 
@@ -252,8 +252,7 @@ class CRUDUser(BaseCRUDRepository[User, UserCreate, UserUpdate]):
             db: Session,
             skip: int = 0,
             limit: int = 100,
-            order_by: Optional[str] = None,
-            order_direction: Literal['asc', 'desc'] = 'asc',
+            order_by: Optional[List[str]] = None,
             time_range_min: datetime = None,
             time_range_max: datetime = None,
             is_deleted: bool = None,
@@ -273,17 +272,7 @@ class CRUDUser(BaseCRUDRepository[User, UserCreate, UserUpdate]):
             if time_range_min: query = query.filter(User.created_at >= time_range_min)
             if time_range_max: query = query.filter(User.created_at <= time_range_max)
 
-            if order_by:
-                try:
-                    order_column = getattr(User, order_by)
-                except AttributeError:
-                    raise ValueError(f'Invalid key given to order_by: {order_by}')
-                query = query.order_by(
-                    order_column.desc() if order_direction == 'desc' else order_column.asc()
-                )
-            else:
-                query = query.order_by(desc(User.created_at))
-
+            query = await self._get_ordering(query, order_by)
             results = query.offset(skip).limit(limit).all()
             return results
         except HTTPException:

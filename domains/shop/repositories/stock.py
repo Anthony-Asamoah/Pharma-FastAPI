@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Literal, Optional, List
+from typing import Optional, List
 
 from fastapi import HTTPException
 from pydantic import UUID4
@@ -132,8 +132,7 @@ class CRUDStock(BaseCRUDRepository[Stock, StockCreateInternal, StockUpdateIntern
             self, db: Session,
             skip: int = 0,
             limit: int = 100,
-            order_by: str = None,
-            order_direction: Literal['asc', 'desc'] = 'asc',
+            order_by: Optional[List[str]] = None,
             search: str = None,
             quantity_min: int = None,
             quantity_max: int = None,
@@ -155,19 +154,9 @@ class CRUDStock(BaseCRUDRepository[Stock, StockCreateInternal, StockUpdateIntern
             if expiry_date_min is not None: query = query.filter(Stock.expiry_date >= expiry_date_min)
             if expiry_date_max is not None: query = query.filter(Stock.expiry_date <= expiry_date_max)
 
-            if order_by:
-                try:
-                    order_column = getattr(self.model, order_by)
-                except AttributeError:
-                    raise KeyError(f'Invalid key given to order_by: {order_by}')
-
-                query = query.order_by(
-                    order_column.desc() if order_direction == 'desc' else order_column.asc()
-                )
-            else:
-                query = query.order_by(desc(self.model.created_at))
-
+            query = await self._get_ordering(query=query, order_by=order_by)
             results = query.offset(skip).limit(limit).all()
+
             return results
         except HTTPException:
             raise
