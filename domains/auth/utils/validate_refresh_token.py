@@ -8,7 +8,6 @@ from starlette import status
 from config.settings import settings
 from db.session import get_db
 from domains.auth.utils.get_current_user import oauth2_scheme
-from domains.auth.services.user import user_service
 
 
 async def validate_refresh_token(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)):
@@ -22,7 +21,10 @@ async def validate_refresh_token(token: Annotated[str, Depends(oauth2_scheme)], 
 
     except JWTError:
         raise credentials_exception
+
+    from domains.auth.services.user import user_service
     user = await user_service.get_user_by_username(db=db, username=username)
+
     if user is None: raise credentials_exception
 
     return user, token

@@ -68,12 +68,6 @@ class AppSettings(BaseSettings):
 
     UPLOAD_URL: str = "/uploads/"
     UPLOAD_ROOT: str = os.path.join(BASE_DIR, 'uploads')
-    model_config = SettingsConfigDict(
-        env_file=os.path.join(BASE_DIR.parent, ".env"),
-        case_sensitive=True,
-        validate_assignment=True,
-        extra="allow",
-    )
 
     # jwt
     ACCESS_TOKEN_EXPIRES_IN: int = 60
@@ -85,6 +79,12 @@ class AppSettings(BaseSettings):
     JWT_REFRESH_KEY: str = "048faeba7203f5fdda"
 
     intruder_list: list = []
+    model_config = SettingsConfigDict(
+        env_file=os.path.join(BASE_DIR, ".env"),
+        case_sensitive=True,
+        validate_assignment=True,
+        extra="allow",
+    )
 
     @property
     def set_app_attributes(self) -> dict[str, str | bool | None]:

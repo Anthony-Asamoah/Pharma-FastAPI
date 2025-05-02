@@ -8,7 +8,6 @@ from sqlalchemy.orm import Session
 from config.settings import settings
 from db.session import get_db
 from domains.auth.services.revoked_token import revoked_token_service
-from domains.auth.services.user import user_service
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/login")
 
@@ -26,7 +25,9 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Se
     except JWTError:
         raise credentials_exception
 
+    from domains.auth.services.user import user_service
     user = await user_service.get_user_by_username(db=db, username=username)
+
     if user is None: raise credentials_exception
     if not user.is_active: raise credentials_exception
     if user.is_deleted: raise credentials_exception
