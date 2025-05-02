@@ -252,7 +252,7 @@ class BaseCRUDRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType])
             ModelType: Existing or newly created record
         """
         try:
-            if existing_obj := await self.get_one(db=db, **{unique_field: getattr(data, unique_field)}):
+            if existing_obj := await self.get_one(db=db, silent=True, **{unique_field: getattr(data, unique_field)}):
                 return existing_obj
 
             return await self.create(db=db, data=data)
